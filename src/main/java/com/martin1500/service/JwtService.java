@@ -19,7 +19,7 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
-    private static final int MIN_KEY_LENGTH = 32;
+    private static final int EXACT_LENGTH = 48;
     private static final Logger log = LoggerFactory.getLogger(JwtService.class);
 
     @Value("${jwt.secretKey:${JWT_SECRET_KEY}}")
@@ -52,9 +52,9 @@ public class JwtService {
         if (secretKey == null) {
             throw new MissingSecretKeyException("The JWT_SECRET_KEY environment variable must be set.");
         }
-        if (secretKey.length() < MIN_KEY_LENGTH) {
-            log.error("The secret key must be at least {} characters long.", MIN_KEY_LENGTH);
-            throw new IllegalArgumentException("The secret key must be at least " + MIN_KEY_LENGTH + " characters long.");
+        if (secretKey.length() != EXACT_LENGTH) {
+            log.error("The secret key must be {} characters long.", EXACT_LENGTH);
+            throw new IllegalArgumentException("The secret key must be " + EXACT_LENGTH + " characters long.");
         }
         return Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKey));
     }
