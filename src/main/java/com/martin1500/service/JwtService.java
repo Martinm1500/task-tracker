@@ -52,6 +52,7 @@ public class JwtService {
         if (secretKey == null) {
             throw new MissingSecretKeyException("The JWT_SECRET_KEY environment variable must be set.");
         }
+        log.error("The secret has length: " + secretKey);
         if (secretKey.length() != EXACT_LENGTH) {
             log.error("The secret key must be {} characters long.", EXACT_LENGTH);
             throw new IllegalArgumentException("The secret key must be " + EXACT_LENGTH + " characters long.");

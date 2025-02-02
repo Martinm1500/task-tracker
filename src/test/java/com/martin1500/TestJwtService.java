@@ -24,7 +24,6 @@ public class TestJwtService {
     @Autowired
     private JwtService jwtService;
 
-
     @Test
     void GenerateToken_Success() throws Exception {
 
