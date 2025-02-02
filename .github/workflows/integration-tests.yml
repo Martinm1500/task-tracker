@@ -20,8 +20,5 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Verificar variables de entorno
-        run: env | grep JWT_SECRET_KEY
-
-      - name: Build and Test
+      - name: Run tests
         run: mvn clean test
