@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.lang.reflect.Method;
@@ -19,8 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest(classes = TaskTrackerApplication.class)
 @ExtendWith(MockitoExtension.class)
 public class TestJwtService {
-    private final String secretKey= System.getenv("JWT_SECRET_KEY");
 
+    @Value("${jwt.secretKey:${JWT_SECRET_KEY}}")
+    private String secretKey;
     @Autowired
     private JwtService jwtService;
 
