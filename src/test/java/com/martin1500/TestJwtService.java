@@ -27,6 +27,7 @@ public class TestJwtService {
     @Test
     void GenerateToken_Success() throws Exception {
 
+        System.out.println(secretKey);
         // Given
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", "USER");
