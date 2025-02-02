@@ -54,7 +54,7 @@ public class JwtService {
         }
         if (secretKey.length() != EXACT_LENGTH) {
             log.error("The secret key must be {} characters long.", EXACT_LENGTH);
-            throw new IllegalArgumentException("The secret key must be " + EXACT_LENGTH + " characters long.");
+            throw new IllegalArgumentException("The secret key must be " + EXACT_LENGTH + " characters long. " + secretKey + "_");
         }
         return Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKey));
     }
