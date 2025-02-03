@@ -29,12 +29,17 @@ public class JwtService {
     private int keyLength;
 
     @Value("${jwt.expirationTime:1800000}")
-    private long expirationTime;
+    private long EXPIRATION_TIME;
 
     public String generateToken(Map<String, Object> claims, String username) {
+
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be null or empty");
+        }
+
         try {
             Date now = new Date();
-            Date expiryDate = new Date(now.getTime() + expirationTime);
+            Date expiryDate = new Date(now.getTime() + EXPIRATION_TIME);
 
             return Jwts.builder()
                     .setClaims(claims)
@@ -43,8 +48,9 @@ public class JwtService {
                     .setExpiration(expiryDate)
                     .signWith(getSignKey(), SignatureAlgorithm.HS256)
                     .compact();
-        } catch (IllegalArgumentException | MissingSecretKeyException e) {
-            throw new JwtException("Error generating the token for user " + username + ". Please contact the administrator.");
+        } catch (SecurityException e) {
+            log.error("Error generating JWT token: {}", e.getMessage());
+            throw new JwtException("Failed to generate JWT token due to security issues.");
         }
     }
 
@@ -54,10 +60,11 @@ public class JwtService {
         }
         if (secretKey.length() != EXACT_LENGTH) {
             log.error("The secret key must be {} characters long.", EXACT_LENGTH);
-            throw new IllegalArgumentException("The secret key must be " + EXACT_LENGTH + " characters long. " + secretKey + "_");
+            throw new IllegalArgumentException("The secret key must be " + EXACT_LENGTH + " characters long.");
         }
         return Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKey));
     }
+
 
 
     public String extractUsername(String token) {
