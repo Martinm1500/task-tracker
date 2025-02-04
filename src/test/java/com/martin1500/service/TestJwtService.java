@@ -1,12 +1,12 @@
-package com.martin1500;
+package com.martin1500.service;
 
-import com.martin1500.service.JwtService;
+import com.martin1500.TaskTrackerApplication;
+
 import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.lang.reflect.Method;
@@ -21,15 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(MockitoExtension.class)
 public class TestJwtService {
 
-    @Value("${jwt.secretKey:${JWT_SECRET_KEY}}")
-    private String secretKey;
     @Autowired
     private JwtService jwtService;
 
     @Test
     void GenerateToken_Success() throws Exception {
 
-        System.out.println(secretKey);
         // Given
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", "USER");
@@ -50,4 +47,13 @@ public class TestJwtService {
                 .build()
                 .parseClaimsJws(token), "The token should be valid and parseable");
     }
+
+    @Test
+    void shouldFailWhenClaimsAreNull() { }
+
+    @Test
+    void shouldFailWhenUsernameIsNull() { }
+
+
+
 }
