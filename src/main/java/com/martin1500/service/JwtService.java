@@ -69,12 +69,9 @@ public class JwtService {
         return Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKey));
     }
 
-
-
     public String getUsernameFromToken(String token) {
         return extractClaim(token, Claims::getSubject);
     }
-
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         try {
