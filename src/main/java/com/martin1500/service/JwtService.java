@@ -31,6 +31,10 @@ public class JwtService {
     @Value("${jwt.expirationTime:1800000}")
     private long EXPIRATION_TIME;
 
+    public String generateToken(String username) {
+        return generateToken(Collections.emptyMap(), username);
+    }
+
     public String generateToken(Map<String, Object> claims, String username) {
 
         if (username == null || username.trim().isEmpty()) {
