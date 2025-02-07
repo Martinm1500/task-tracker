@@ -3,6 +3,8 @@ package com.martin1500.model;
 import com.martin1500.model.util.Priority;
 import com.martin1500.model.util.Status;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -13,6 +15,8 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 public class Task {
     @Id
@@ -46,9 +50,4 @@ public class Task {
 
     private String comments;
 
-    public Task(Priority priority, LocalDate dueDate, String comments){
-        this.priority = priority;
-        this.dueDate = dueDate;
-        this.comments = comments;
-    }
 }
