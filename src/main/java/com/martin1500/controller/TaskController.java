@@ -37,4 +37,11 @@ public class TaskController {
         TaskDTO taskDTO = taskService.getTaskById(id);
         return ResponseEntity.ok(taskDTO);
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @RequestBody TaskDTO taskDTO) {
+        TaskDTO updatedTaskDTO = taskService.updateTask(id, taskDTO);
+        return ResponseEntity.ok(updatedTaskDTO);
+    }
 }

@@ -12,4 +12,6 @@ public interface TaskService {
     List<TaskDTO> getTasksForCurrentUser();
 
     TaskDTO getTaskById(Long id);
+
+    TaskDTO updateTask(Long id, TaskDTO taskDTO);
 }

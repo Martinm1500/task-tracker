@@ -54,6 +54,24 @@ public class TaskServiceImpl implements TaskService {
         return taskToTaskDTO(task);
     }
 
+    @Override
+    public TaskDTO updateTask(Long id, TaskDTO taskDTO) {
+        User currentUser = getAuthenticatedUser();
+
+        Task task = repository.findByIdAndUser(id, currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
+
+        task.setTitle(taskDTO.getTitle());
+        task.setDescription(taskDTO.getDescription());
+        task.setPriority(taskDTO.getPriority());
+        task.setDueDate(taskDTO.getDueDate());
+        task.setComments(taskDTO.getComments());
+
+        Task updatedTask = repository.save(task);
+
+        return taskToTaskDTO(updatedTask);
+    }
+
     private TaskDTO taskToTaskDTO(Task task){
         return TaskDTO.builder()
                 .id(task.getId())
