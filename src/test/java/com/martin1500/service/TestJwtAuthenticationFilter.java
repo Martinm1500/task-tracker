@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,9 +48,6 @@ public class TestJwtAuthenticationFilter {
     @Mock
     private FilterChain filterChain;
 
-    @Mock
-    private Authentication authentication;
-
     @BeforeEach
     void setUp() {
         SecurityContextHolder.setContext(securityContext);
@@ -64,7 +60,7 @@ public class TestJwtAuthenticationFilter {
         UserDetails userDetails = new User(username, "password", List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
-        when(jwtService.getUsernameFromToken(token)).thenReturn(username);
+        when(jwtService.extractUsername(token)).thenReturn(username);
         when(jwtService.isTokenValid(token, userDetails)).thenReturn(true);
         when(userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
         when(securityContext.getAuthentication()).thenReturn(null);

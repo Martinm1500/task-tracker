@@ -6,6 +6,7 @@ import com.martin1500.model.Task;
 import com.martin1500.model.User;
 import com.martin1500.model.util.Priority;
 import com.martin1500.repository.TaskRepository;
+import com.martin1500.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +20,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
-import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +30,9 @@ public class TestTaskServiceImpl {
 
     @Mock
     private TaskRepository repository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private SecurityContext securityContext;
@@ -69,6 +73,7 @@ public class TestTaskServiceImpl {
                 .build();
 
         when(repository.save(any(Task.class))).thenReturn(savedTask);
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
 
         // Act
         TaskDTO result = taskService.createTask(taskCreateDTO);
