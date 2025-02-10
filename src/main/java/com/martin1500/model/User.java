@@ -1,11 +1,11 @@
 package com.martin1500.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.martin1500.model.util.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,11 +14,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = {"tasks"})
+@ToString(exclude = {"tasks"})
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
@@ -30,10 +32,13 @@ public class User implements UserDetails {
     @Column(unique=true, nullable=false)
     private String username;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable=false)
+    @Email
     private String email;
 
-    @Column(unique=true, nullable=false)
+    @Column(nullable=false)
+    @Size(min = 8, max = 100)
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)
