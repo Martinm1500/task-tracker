@@ -30,4 +30,11 @@ public class TaskController {
         List<TaskDTO> tasks = taskService.getTasksForCurrentUser();
         return ResponseEntity.ok(tasks);
     }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<TaskDTO> getTaskById(@PathVariable Long id) {
+        TaskDTO taskDTO = taskService.getTaskById(id);
+        return ResponseEntity.ok(taskDTO);
+    }
 }

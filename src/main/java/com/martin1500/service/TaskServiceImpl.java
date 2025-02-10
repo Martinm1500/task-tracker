@@ -2,6 +2,7 @@ package com.martin1500.service;
 
 import com.martin1500.dto.TaskCreateDTO;
 import com.martin1500.dto.TaskDTO;
+import com.martin1500.exception.ResourceNotFoundException;
 import com.martin1500.model.Task;
 import com.martin1500.model.User;
 import com.martin1500.model.util.Status;
@@ -43,6 +44,14 @@ public class TaskServiceImpl implements TaskService {
         return tasks.stream()
                 .map(this::taskToTaskDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public TaskDTO getTaskById(Long id) {
+        User currentUser = getAuthenticatedUser();
+        Task task = repository.findByIdAndUser(id, currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
+        return taskToTaskDTO(task);
     }
 
     private TaskDTO taskToTaskDTO(Task task){
