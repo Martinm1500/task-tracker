@@ -2,15 +2,12 @@ package com.martin1500.service;
 import java.security.Key;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.martin1500.exception.MissingSecretKeyException;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +21,6 @@ public class JwtService {
 
     @Value("${jwt.secretKey:${JWT_SECRET_KEY}}")
     private String secretKey;
-
-    @Value("${jwt.secretKeyBits:256}")
-    private int keyLength;
 
     @Value("${jwt.expirationTime:1800000}")
     private long EXPIRATION_TIME;
@@ -69,27 +63,13 @@ public class JwtService {
         return Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKey));
     }
 
-    public String getUsernameFromToken(String token) {
+    public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        try {
-            Claims claims = extractAllClaims(token);
-            return claims.getSubject().equals(userDetails.getUsername()) && !isTokenExpired(token);
-        } catch (ExpiredJwtException e) {
-            log.warn("Token expired for user: {}", userDetails.getUsername());
-            return false;
-        } catch (io.jsonwebtoken.security.SignatureException e) {
-            log.error("Invalid token signature for user: {}", userDetails.getUsername());
-            return false;
-        } catch (JwtException e) {
-            log.error("Invalid token for user: {}", userDetails.getUsername());
-            return false;
-        } catch (IllegalArgumentException | MissingSecretKeyException e) {
-            log.error("SecretKey is not configured correctly", e);
-            return false;
-        }
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
@@ -99,15 +79,6 @@ public class JwtService {
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-    public List<GrantedAuthority> getAuthoritiesFromToken(String token) {
-        Claims claims = extractAllClaims(token);
-        List<String> roles = claims.get("roles", List.class);
-
-        return roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-    }
-
 
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
@@ -120,13 +91,6 @@ public class JwtService {
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
-    }
-
-    public String renewToken(String token, UserDetails userDetails) {
-        if (!isTokenValid(token, userDetails)) {
-            throw new JwtException("Cannot renew an invalid or expired token.");
-        }
-        return generateToken(new HashMap<>(), userDetails.getUsername());
     }
 
 }

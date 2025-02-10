@@ -17,20 +17,12 @@ import java.time.LocalDateTime;
 public class TaskDTO {
 
     private Long id;
-
     private String title;
-
     private String description;
-
     private Status status;
-
     private Priority priority;
-
     private LocalDate dueDate;
-
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
-
     private String comments;
 }
