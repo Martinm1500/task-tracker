@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -89,6 +90,18 @@ public class TaskServiceImpl implements TaskService {
         User currentUser = getAuthenticatedUser();
 
         List<Task> tasks = repository.findByUserAndPriority(currentUser, priority);
+
+        return tasks.stream()
+                .map(this::taskToTaskDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskDTO> getOverdueTasks() {
+        User currentUser = getAuthenticatedUser();
+        LocalDate currentDate = LocalDate.now();
+
+        List<Task> tasks = repository.findByUserAndDueDateBefore(currentUser, currentDate);
 
         return tasks.stream()
                 .map(this::taskToTaskDTO)

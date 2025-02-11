@@ -60,4 +60,10 @@ public class TaskController {
         List<TaskDTO> tasks = taskService.getTasksByPriority(priority);
         return ResponseEntity.ok(tasks);
     }
+
+    @GetMapping("/overdue")
+    public ResponseEntity<List<TaskDTO>> getOverdueTasks() {
+        List<TaskDTO> tasks = taskService.getOverdueTasks();
+        return ResponseEntity.ok(tasks);
+    }
 }

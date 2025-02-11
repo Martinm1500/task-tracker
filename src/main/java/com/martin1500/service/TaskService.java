@@ -20,4 +20,6 @@ public interface TaskService {
     List<TaskDTO> getTasksByStatus(Status status);
 
     List<TaskDTO> getTasksByPriority(Priority priority);
+
+    List<TaskDTO> getOverdueTasks();
 }
