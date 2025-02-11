@@ -2,6 +2,7 @@ package com.martin1500.controller;
 
 import com.martin1500.dto.TaskCreateDTO;
 import com.martin1500.dto.TaskDTO;
+import com.martin1500.model.util.Status;
 import com.martin1500.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,5 +44,12 @@ public class TaskController {
     public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @RequestBody TaskDTO taskDTO) {
         TaskDTO updatedTaskDTO = taskService.updateTask(id, taskDTO);
         return ResponseEntity.ok(updatedTaskDTO);
+    }
+
+    @GetMapping("/status/{status}")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<List<TaskDTO>> getTasksByStatus(@PathVariable Status status) {
+        List<TaskDTO> tasks = taskService.getTasksByStatus(status);
+        return ResponseEntity.ok(tasks);
     }
 }

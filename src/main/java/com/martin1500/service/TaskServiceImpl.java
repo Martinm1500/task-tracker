@@ -72,6 +72,17 @@ public class TaskServiceImpl implements TaskService {
         return taskToTaskDTO(updatedTask);
     }
 
+    @Override
+    public List<TaskDTO> getTasksByStatus(Status status) {
+        User currentUser = getAuthenticatedUser();
+
+        List<Task> tasks = repository.findByUserAndStatus(currentUser, status);
+
+        return tasks.stream()
+                .map(this::taskToTaskDTO)
+                .collect(Collectors.toList());
+    }
+
     private TaskDTO taskToTaskDTO(Task task){
         return TaskDTO.builder()
                 .id(task.getId())
