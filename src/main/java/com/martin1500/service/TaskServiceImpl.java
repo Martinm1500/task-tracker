@@ -5,6 +5,7 @@ import com.martin1500.dto.TaskDTO;
 import com.martin1500.exception.ResourceNotFoundException;
 import com.martin1500.model.Task;
 import com.martin1500.model.User;
+import com.martin1500.model.util.Priority;
 import com.martin1500.model.util.Status;
 import com.martin1500.repository.TaskRepository;
 import com.martin1500.repository.UserRepository;
@@ -77,6 +78,17 @@ public class TaskServiceImpl implements TaskService {
         User currentUser = getAuthenticatedUser();
 
         List<Task> tasks = repository.findByUserAndStatus(currentUser, status);
+
+        return tasks.stream()
+                .map(this::taskToTaskDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskDTO> getTasksByPriority(Priority priority) {
+        User currentUser = getAuthenticatedUser();
+
+        List<Task> tasks = repository.findByUserAndPriority(currentUser, priority);
 
         return tasks.stream()
                 .map(this::taskToTaskDTO)

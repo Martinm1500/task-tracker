@@ -2,6 +2,7 @@ package com.martin1500.controller;
 
 import com.martin1500.dto.TaskCreateDTO;
 import com.martin1500.dto.TaskDTO;
+import com.martin1500.model.util.Priority;
 import com.martin1500.model.util.Status;
 import com.martin1500.service.TaskService;
 import jakarta.validation.Valid;
@@ -50,6 +51,13 @@ public class TaskController {
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<List<TaskDTO>> getTasksByStatus(@PathVariable Status status) {
         List<TaskDTO> tasks = taskService.getTasksByStatus(status);
+        return ResponseEntity.ok(tasks);
+    }
+
+    @GetMapping("/priority/{priority}")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<List<TaskDTO>> getTasksByPriority(@PathVariable Priority priority) {
+        List<TaskDTO> tasks = taskService.getTasksByPriority(priority);
         return ResponseEntity.ok(tasks);
     }
 }
