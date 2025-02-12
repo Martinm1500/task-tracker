@@ -9,6 +9,12 @@ import java.util.List;
 
 public interface TaskService {
 
+    /**
+    * Creates a new task.
+    *
+    * @param taskCreateDTO The task object containing details such as title, description, priority, and due date.
+    * @return The created task with a unique ID and timestamps.
+    **/
     TaskDTO createTask(TaskCreateDTO taskCreateDTO);
 
     List<TaskDTO> getTasksForCurrentUser();

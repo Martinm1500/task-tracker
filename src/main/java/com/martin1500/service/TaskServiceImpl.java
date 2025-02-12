@@ -8,12 +8,7 @@ import com.martin1500.model.User;
 import com.martin1500.model.util.Priority;
 import com.martin1500.model.util.Status;
 import com.martin1500.repository.TaskRepository;
-import com.martin1500.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -24,24 +19,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
 
-    private final TaskRepository repository;
+    private final TaskRepository taskRepository;
 
-    private final UserRepository userRepository;
+    private final UserContextService userContextService;
 
     @Override
     public TaskDTO createTask(TaskCreateDTO taskCreateDTO) {
-        User user = getAuthenticatedUser();
+        User authenticatedUser = userContextService.getAuthenticatedUser();
         Task newTask = taskDTOtoTask(taskCreateDTO);
-        newTask.setUser(user);
+        newTask.setUser(authenticatedUser);
         newTask.setStatus(Status.PENDING);
-        Task createdTask = repository.save(newTask);
+        Task createdTask = taskRepository.save(newTask);
         return taskToTaskDTO(createdTask);
     }
 
     @Override
     public List<TaskDTO> getTasksForCurrentUser() {
-        User currentUser = getAuthenticatedUser();
-        List<Task> tasks = repository.findByUserOrderByPriorityAscDueDateAsc(currentUser);
+        User authenticatedUser = userContextService.getAuthenticatedUser();
+        List<Task> tasks = taskRepository.findByUserOrderByPriorityAscDueDateAsc(authenticatedUser);
 
         return tasks.stream()
                 .map(this::taskToTaskDTO)
@@ -50,17 +45,21 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskDTO getTaskById(Long id) {
-        User currentUser = getAuthenticatedUser();
-        Task task = repository.findByIdAndUser(id, currentUser)
+        User authenticatedUser = userContextService.getAuthenticatedUser();
+        Task task = taskRepository.findByIdAndUser(id, authenticatedUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
         return taskToTaskDTO(task);
     }
 
     @Override
     public TaskDTO updateTask(Long id, TaskDTO taskDTO) {
-        User currentUser = getAuthenticatedUser();
+        User authenticatedUser = userContextService.getAuthenticatedUser();
 
-        Task task = repository.findByIdAndUser(id, currentUser)
+        if (taskRepository.existsByTitleAndUser(taskDTO.getTitle(), authenticatedUser)) {
+            throw new IllegalArgumentException("You already have a task with the same title.");
+        }
+
+        Task task = taskRepository.findByIdAndUser(id, authenticatedUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
 
         task.setTitle(taskDTO.getTitle());
@@ -69,16 +68,16 @@ public class TaskServiceImpl implements TaskService {
         task.setDueDate(taskDTO.getDueDate());
         task.setComments(taskDTO.getComments());
 
-        Task updatedTask = repository.save(task);
+        Task updatedTask = taskRepository.save(task);
 
         return taskToTaskDTO(updatedTask);
     }
 
     @Override
     public List<TaskDTO> getTasksByStatus(Status status) {
-        User currentUser = getAuthenticatedUser();
+        User authenticatedUser = userContextService.getAuthenticatedUser();
 
-        List<Task> tasks = repository.findByUserAndStatus(currentUser, status);
+        List<Task> tasks = taskRepository.findByUserAndStatus(authenticatedUser, status);
 
         return tasks.stream()
                 .map(this::taskToTaskDTO)
@@ -87,9 +86,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<TaskDTO> getTasksByPriority(Priority priority) {
-        User currentUser = getAuthenticatedUser();
+        User authenticatedUser = userContextService.getAuthenticatedUser();
 
-        List<Task> tasks = repository.findByUserAndPriority(currentUser, priority);
+        List<Task> tasks = taskRepository.findByUserAndPriority(authenticatedUser, priority);
 
         return tasks.stream()
                 .map(this::taskToTaskDTO)
@@ -98,10 +97,10 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<TaskDTO> getOverdueTasks() {
-        User currentUser = getAuthenticatedUser();
+        User authenticatedUser = userContextService.getAuthenticatedUser();
         LocalDate currentDate = LocalDate.now();
 
-        List<Task> tasks = repository.findByUserAndDueDateBefore(currentUser, currentDate);
+        List<Task> tasks = taskRepository.findByUserAndDueDateBefore(authenticatedUser, currentDate);
 
         return tasks.stream()
                 .map(this::taskToTaskDTO)
@@ -124,15 +123,5 @@ public class TaskServiceImpl implements TaskService {
                 .dueDate(taskDTO.dueDate())
                 .comments(taskDTO.comments())
                 .build();
-    }
-
-    private User getAuthenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            return userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userDetails.getUsername()));
-        }
-        throw new IllegalStateException("No authenticated user found.");
     }
 }

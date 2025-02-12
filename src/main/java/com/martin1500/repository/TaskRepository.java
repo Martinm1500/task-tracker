@@ -22,4 +22,6 @@ public interface TaskRepository extends JpaRepository<Task, Long > {
     List<Task> findByUserAndPriority(User user, Priority priority);
 
     List<Task> findByUserAndDueDateBefore(User user, LocalDate dueDate);
+
+    boolean existsByTitleAndUser(String title, User user);
 }
