@@ -38,9 +38,7 @@ public class TaskServiceImpl implements TaskService {
         User authenticatedUser = userContextService.getAuthenticatedUser();
         List<Task> tasks = taskRepository.findByUserOrderByPriorityAscDueDateAsc(authenticatedUser);
 
-        return tasks.stream()
-                .map(this::taskToTaskDTO)
-                .collect(Collectors.toList());
+        return convertTasksToDTOs(tasks);
     }
 
     @Override
@@ -79,9 +77,7 @@ public class TaskServiceImpl implements TaskService {
 
         List<Task> tasks = taskRepository.findByUserAndStatus(authenticatedUser, status);
 
-        return tasks.stream()
-                .map(this::taskToTaskDTO)
-                .collect(Collectors.toList());
+        return convertTasksToDTOs(tasks);
     }
 
     @Override
@@ -90,9 +86,7 @@ public class TaskServiceImpl implements TaskService {
 
         List<Task> tasks = taskRepository.findByUserAndPriority(authenticatedUser, priority);
 
-        return tasks.stream()
-                .map(this::taskToTaskDTO)
-                .collect(Collectors.toList());
+        return convertTasksToDTOs(tasks);
     }
 
     @Override
@@ -102,9 +96,7 @@ public class TaskServiceImpl implements TaskService {
 
         List<Task> tasks = taskRepository.findByUserAndDueDateBefore(authenticatedUser, currentDate);
 
-        return tasks.stream()
-                .map(this::taskToTaskDTO)
-                .collect(Collectors.toList());
+        return convertTasksToDTOs(tasks);
     }
 
     private TaskDTO taskToTaskDTO(Task task){
@@ -123,5 +115,11 @@ public class TaskServiceImpl implements TaskService {
                 .dueDate(taskDTO.dueDate())
                 .comments(taskDTO.comments())
                 .build();
+    }
+
+    private List<TaskDTO> convertTasksToDTOs(List<Task> tasks) {
+        return tasks.stream()
+                .map(this::taskToTaskDTO)
+                .collect(Collectors.toList());
     }
 }
