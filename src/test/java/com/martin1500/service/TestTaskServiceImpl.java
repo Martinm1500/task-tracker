@@ -6,8 +6,6 @@ import com.martin1500.model.Task;
 import com.martin1500.model.User;
 import com.martin1500.model.util.Priority;
 import com.martin1500.repository.TaskRepository;
-import com.martin1500.repository.UserRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,12 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-
 import java.time.LocalDate;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -32,13 +25,7 @@ public class TestTaskServiceImpl {
     private TaskRepository repository;
 
     @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private SecurityContext securityContext;
-
-    @Mock
-    private Authentication authentication;
+    private UserContextService userContextService;
 
     @InjectMocks
     private TaskServiceImpl taskService;
@@ -48,15 +35,6 @@ public class TestTaskServiceImpl {
     @BeforeEach
     void setUp() {
         user.setId(1L);
-
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getPrincipal()).thenReturn(user);
-        SecurityContextHolder.setContext(securityContext);
-    }
-
-    @AfterEach
-    void tearDown() {
-        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -73,7 +51,7 @@ public class TestTaskServiceImpl {
                 .build();
 
         when(repository.save(any(Task.class))).thenReturn(savedTask);
-        when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
+        when(userContextService.getAuthenticatedUser()).thenReturn(user);
 
         // Act
         TaskDTO result = taskService.createTask(taskCreateDTO);
