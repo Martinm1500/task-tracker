@@ -1,5 +1,3 @@
-name: CI
-
 on:
   push:
     branches:
@@ -8,24 +6,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_DB: testdb
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpassword
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
     env:
       JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/testdb
-      SPRING_DATASOURCE_USERNAME: testuser
-      SPRING_DATASOURCE_PASSWORD: testpassword
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
