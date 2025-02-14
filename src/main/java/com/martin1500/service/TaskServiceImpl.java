@@ -10,6 +10,7 @@ import com.martin1500.model.util.Status;
 import com.martin1500.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,6 +25,7 @@ public class TaskServiceImpl implements TaskService {
     private final UserContextService userContextService;
 
     @Override
+    @Transactional
     public TaskDTO createTask(TaskCreateDTO taskCreateDTO) {
         User authenticatedUser = userContextService.getAuthenticatedUser();
         Task newTask = taskDTOtoTask(taskCreateDTO);
@@ -50,6 +52,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public TaskDTO updateTask(Long id, TaskDTO taskDTO) {
         User authenticatedUser = userContextService.getAuthenticatedUser();
 
@@ -104,6 +107,7 @@ public class TaskServiceImpl implements TaskService {
                 .id(task.getId())
                 .priority(task.getPriority())
                 .dueDate(task.getDueDate())
+                .status(task.getStatus())
                 .comments(task.getComments())
                 .createdAt(task.getCreatedAt())
                 .build();
