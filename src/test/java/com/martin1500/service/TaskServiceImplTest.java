@@ -24,6 +24,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -91,6 +92,36 @@ public class TaskServiceImplTest {
         Task savedTask = taskRepository.findById(result.getId()).orElse(null);
         assertNotNull(savedTask);
         assertEquals(authenticatedUser.getId(), savedTask.getUser().getId());
+    }
 
+    @Test
+    public void testGetTasksForCurrentUser() {
+        // Arrange
+        Task task1 = new Task();
+        task1.setTitle("Task 1");
+        task1.setDescription("Description 1");
+        task1.setPriority(Priority.HIGH);
+        task1.setDueDate(LocalDate.now());
+        task1.setStatus(Status.PENDING);
+        task1.setUser(authenticatedUser);
+        taskRepository.save(task1);
+
+        Task task2 = new Task();
+        task2.setTitle("Task 2");
+        task2.setDescription("Description 2");
+        task2.setPriority(Priority.MEDIUM);
+        task2.setDueDate(LocalDate.now().plusDays(1));
+        task2.setStatus(Status.PENDING);
+        task2.setUser(authenticatedUser);
+        taskRepository.save(task2);
+
+        // Act
+        List<TaskDTO> result = taskService.getTasksForCurrentUser();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Task 1", result.get(0).getTitle());
+        assertEquals("Task 2", result.get(1).getTitle());
     }
 }

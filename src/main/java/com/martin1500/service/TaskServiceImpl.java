@@ -28,7 +28,7 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public TaskDTO createTask(TaskCreateDTO taskCreateDTO) {
         User authenticatedUser = userContextService.getAuthenticatedUser();
-        Task newTask = taskDTOtoTask(taskCreateDTO);
+        Task newTask = taskCreateDTOtoTask(taskCreateDTO);
         newTask.setUser(authenticatedUser);
         newTask.setStatus(Status.PENDING);
         Task createdTask = taskRepository.save(newTask);
@@ -105,6 +105,7 @@ public class TaskServiceImpl implements TaskService {
     private TaskDTO taskToTaskDTO(Task task){
         return TaskDTO.builder()
                 .id(task.getId())
+                .title(task.getTitle())
                 .priority(task.getPriority())
                 .dueDate(task.getDueDate())
                 .status(task.getStatus())
@@ -113,7 +114,7 @@ public class TaskServiceImpl implements TaskService {
                 .build();
     }
 
-    private Task taskDTOtoTask(TaskCreateDTO taskDTO){
+    private Task taskCreateDTOtoTask(TaskCreateDTO taskDTO){
         return Task.builder()
                 .priority(taskDTO.priority())
                 .dueDate(taskDTO.dueDate())
