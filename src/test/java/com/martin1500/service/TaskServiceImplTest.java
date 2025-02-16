@@ -95,13 +95,13 @@ public class TaskServiceImplTest {
     }
 
     @Test
-    public void testGetTasksForCurrentUser() {
+    public void getTasksForCurrentUser_ShouldReturnTasksDTO() {
         // Arrange
         Task task1 = new Task();
         task1.setTitle("Task 1");
         task1.setDescription("Description 1");
         task1.setPriority(Priority.HIGH);
-        task1.setDueDate(LocalDate.now());
+        task1.setDueDate(LocalDate.now().plusDays(1));
         task1.setStatus(Status.PENDING);
         task1.setUser(authenticatedUser);
         taskRepository.save(task1);
@@ -123,5 +123,27 @@ public class TaskServiceImplTest {
         assertEquals(2, result.size());
         assertEquals("Task 1", result.get(0).getTitle());
         assertEquals("Task 2", result.get(1).getTitle());
+    }
+
+    @Test
+    void getTaskById_ShouldReturnTaskDTO(){
+        // Arrange
+        Task task1 = new Task();
+        task1.setTitle("Task 1");
+        task1.setDescription("Description 1");
+        task1.setPriority(Priority.HIGH);
+        task1.setDueDate(LocalDate.now().plusDays(1));
+        task1.setStatus(Status.PENDING);
+        task1.setUser(authenticatedUser);
+        Task savedTask = taskRepository.save(task1);
+
+        // Act
+        System.out.println(savedTask.getId());
+        TaskDTO result = taskService.getTaskById(savedTask.getId());
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("Task 1",result.getTitle());
+        assertEquals(task1.getDueDate(), result.getDueDate());
     }
 }
