@@ -138,12 +138,56 @@ public class TaskServiceImplTest {
         Task savedTask = taskRepository.save(task1);
 
         // Act
-        System.out.println(savedTask.getId());
         TaskDTO result = taskService.getTaskById(savedTask.getId());
 
         // Assert
         assertNotNull(result);
         assertEquals("Task 1",result.getTitle());
         assertEquals(task1.getDueDate(), result.getDueDate());
+    }
+
+    @Test
+    void updateTask_ShouldReturnUpdatedTask(){
+        // Arrange
+        Task task1 = new Task();
+        task1.setTitle("Task 1");
+        task1.setDescription("Description 1");
+        task1.setStatus(Status.PENDING);
+        task1.setPriority(Priority.LOW);
+        task1.setDueDate(LocalDate.now().plusDays(1));
+        task1.setComments("First comments");
+
+        task1.setUser(authenticatedUser);
+        Task savedTask = taskRepository.save(task1);
+
+        Long taskId = savedTask.getId();
+
+        TaskDTO updatedTaskDTO = TaskDTO.builder()
+                .description("New description")
+                .status(Status.IN_PROGRESS)
+                .priority(Priority.HIGH)
+                .dueDate(LocalDate.now().plusDays(5))
+                .comments("Updated comments")
+                .build();
+
+        //Act
+        TaskDTO result = taskService.updateTask(taskId, updatedTaskDTO);
+
+        //Assert
+        assertNotNull(result);
+        assertEquals("New description", result.getDescription());
+        assertEquals(Status.IN_PROGRESS, result.getStatus());
+        assertEquals(Priority.HIGH, result.getPriority());
+        assertEquals(LocalDate.now().plusDays(5), result.getDueDate());
+        assertEquals("Updated comments", result.getComments());
+
+        // Verify in database
+        Task updatedTask = taskRepository.findById(taskId).orElseThrow();
+        assertEquals("New description", updatedTask.getDescription());
+        assertEquals(Status.IN_PROGRESS, updatedTask.getStatus());
+        assertEquals(Priority.HIGH, updatedTask.getPriority());
+        assertEquals(LocalDate.now().plusDays(5), updatedTask.getDueDate());
+        assertEquals("Updated comments", updatedTask.getComments());
+
     }
 }

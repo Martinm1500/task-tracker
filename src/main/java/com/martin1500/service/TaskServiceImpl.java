@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,10 +64,11 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findByIdAndUser(id, authenticatedUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
 
-        task.setTitle(taskDTO.getTitle());
         task.setDescription(taskDTO.getDescription());
+        task.setStatus(taskDTO.getStatus());
         task.setPriority(taskDTO.getPriority());
         task.setDueDate(taskDTO.getDueDate());
+        task.setUpdatedAt(LocalDateTime.now());
         task.setComments(taskDTO.getComments());
 
         Task updatedTask = taskRepository.save(task);
@@ -106,6 +108,7 @@ public class TaskServiceImpl implements TaskService {
         return TaskDTO.builder()
                 .id(task.getId())
                 .title(task.getTitle())
+                .description(task.getDescription())
                 .priority(task.getPriority())
                 .dueDate(task.getDueDate())
                 .status(task.getStatus())
