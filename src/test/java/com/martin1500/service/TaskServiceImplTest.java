@@ -278,4 +278,57 @@ public class TaskServiceImplTest {
         assertEquals(3, result.size());
         assertTrue(result.stream().allMatch(task -> task.getPriority() == Priority.LOW));
     }
+
+    @Test
+    void getOverdueTasks_ShouldReturnOnlyOverdueTasks(){
+        // Arrange
+        Task task1 = new Task();
+
+        task1.setStatus(Status.PENDING);
+        task1.setPriority(Priority.LOW);
+        task1.setDueDate(LocalDate.now().minusDays(1));
+
+        task1.setUser(authenticatedUser);
+        taskRepository.save(task1);
+
+        Task task2 = new Task();
+
+        task2.setStatus(Status.PENDING);
+        task2.setPriority(Priority.LOW);
+        task2.setDueDate(LocalDate.now().minusDays(1));
+
+        task2.setUser(authenticatedUser);
+        taskRepository.save(task2);
+
+        Task task3 = new Task();
+
+        task3.setStatus(Status.PENDING);
+        task3.setPriority(Priority.LOW);
+        task3.setDueDate(LocalDate.now().minusDays(1));
+
+        task3.setUser(authenticatedUser);
+        taskRepository.save(task3);
+
+        Task task4 = new Task();
+
+        task4.setStatus(Status.PENDING);
+        task4.setPriority(Priority.LOW);
+        task4.setDueDate(LocalDate.now().plusDays(1));
+
+        task4.setUser(authenticatedUser);
+        taskRepository.save(task4);
+
+        //Act
+        List<TaskDTO> result = taskService.getOverdueTasks();
+
+        //Assert
+        assertNotNull(result);
+        assertEquals(3, result.size());
+        assertTrue(result.stream().allMatch(task -> task.getDueDate().isBefore(LocalDate.now())));
+    }
 }
+
+
+
+
+
