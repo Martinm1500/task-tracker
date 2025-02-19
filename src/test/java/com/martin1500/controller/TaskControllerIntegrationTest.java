@@ -186,4 +186,49 @@ public class TaskControllerIntegrationTest {
         assertEquals(task.getPriority(), response.getBody().getPriority());
         assertEquals(task.getDueDate(), response.getBody().getDueDate());
     }
+
+    @Test
+    void updateTask_ShouldReturnUpdatedTaskDTO() {
+        // Arrange
+        Task task = new Task();
+        task.setUser(authenticatedUser);
+        task.setTitle("Original Title");
+        task.setDescription("Original Description");
+        task.setStatus(Status.PENDING);
+        task.setPriority(Priority.LOW);
+        task.setDueDate(LocalDate.now().plusDays(1));
+        task.setComments("Original Comments");
+        task = taskRepository.save(task);
+
+        TaskDTO updatedTaskDTO = new TaskDTO();
+        updatedTaskDTO.setTitle("Updated Title");
+        updatedTaskDTO.setDescription("Updated Description");
+        updatedTaskDTO.setStatus(Status.IN_PROGRESS);
+        updatedTaskDTO.setPriority(Priority.HIGH);
+        updatedTaskDTO.setDueDate(LocalDate.now().plusDays(2));
+        updatedTaskDTO.setComments("Updated Comments");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwtToken);
+
+        HttpEntity<TaskDTO> request = new HttpEntity<>(updatedTaskDTO, headers);
+
+        // Act
+        ResponseEntity<TaskDTO> response = restTemplate.exchange(
+                "/api/tasks/" + task.getId(),
+                HttpMethod.PUT,
+                request,
+                TaskDTO.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Updated Description", response.getBody().getDescription());
+        assertEquals(Status.IN_PROGRESS, response.getBody().getStatus());
+        assertEquals(Priority.HIGH, response.getBody().getPriority());
+        assertEquals(LocalDate.now().plusDays(2), response.getBody().getDueDate());
+        assertEquals("Updated Comments", response.getBody().getComments());
+    }
 }
