@@ -154,4 +154,36 @@ public class TaskControllerIntegrationTest {
         assertTrue(tasks.stream().anyMatch(t -> t.getComments().equals("Task 1 comments")));
         assertTrue(tasks.stream().anyMatch(t -> t.getComments().equals("Task 2 comments")));
     }
+
+    @Test
+    void getTaskById_ShouldReturnTaskDTO() {
+        // Arrange
+        Task task = new Task();
+        task.setUser(authenticatedUser);
+        task.setPriority(Priority.LOW);
+        task.setDueDate(LocalDate.now().plusDays(1));
+        task.setComments("Test task comments");
+        task = taskRepository.save(task);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtToken);
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        // Act
+        ResponseEntity<TaskDTO> response = restTemplate.exchange(
+                "/api/tasks/" + task.getId(),
+                HttpMethod.GET,
+                request,
+                TaskDTO.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(task.getId(), response.getBody().getId());
+        assertEquals(task.getComments(), response.getBody().getComments());
+        assertEquals(task.getPriority(), response.getBody().getPriority());
+        assertEquals(task.getDueDate(), response.getBody().getDueDate());
+    }
 }
