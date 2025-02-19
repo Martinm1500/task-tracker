@@ -26,6 +26,7 @@ public class TaskController {
         return ResponseEntity.ok(taskService.createTask(taskCreateDTO));
     }
 
+
     @GetMapping
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<List<TaskDTO>> getTasks() {
