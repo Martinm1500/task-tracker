@@ -57,13 +57,10 @@ public class TaskServiceImpl implements TaskService {
     public TaskDTO updateTask(Long id, TaskDTO taskDTO) {
         User authenticatedUser = userContextService.getAuthenticatedUser();
 
-        if (taskRepository.existsByTitleAndUser(taskDTO.getTitle(), authenticatedUser)) {
-            throw new IllegalArgumentException("You already have a task with the same title.");
-        }
-
         Task task = taskRepository.findByIdAndUser(id, authenticatedUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
 
+        task.setTitle(taskDTO.getTitle());
         task.setDescription(taskDTO.getDescription());
         task.setStatus(taskDTO.getStatus());
         task.setPriority(taskDTO.getPriority());
