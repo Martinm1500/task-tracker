@@ -231,4 +231,34 @@ public class TaskControllerIntegrationTest {
         assertEquals(LocalDate.now().plusDays(2), response.getBody().getDueDate());
         assertEquals("Updated Comments", response.getBody().getComments());
     }
+
+    @Test
+    void updateTask_ShouldReturnNotFoundForInvalidId() {
+        // Arrange
+        TaskDTO updatedTaskDTO = new TaskDTO();
+        updatedTaskDTO.setTitle("Updated Title");
+        updatedTaskDTO.setDescription("Updated Description");
+        updatedTaskDTO.setStatus(Status.IN_PROGRESS);
+        updatedTaskDTO.setPriority(Priority.HIGH);
+        updatedTaskDTO.setDueDate(LocalDate.now().plusDays(2));
+        updatedTaskDTO.setComments("Updated Comments");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwtToken);
+
+        HttpEntity<TaskDTO> request = new HttpEntity<>(updatedTaskDTO, headers);
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/api/tasks/999",
+                HttpMethod.PUT,
+                request,
+                String.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
 }
