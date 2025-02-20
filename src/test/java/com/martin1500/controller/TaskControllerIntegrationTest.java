@@ -188,6 +188,20 @@ public class TaskControllerIntegrationTest {
     }
 
     @Test
+    void getTaskById_ShouldReturnForbiddenWhenNotAuthenticated() {
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/api/tasks/1",
+                HttpMethod.GET,
+                null,
+                String.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
+    @Test
     void updateTask_ShouldReturnUpdatedTaskDTO() {
         // Arrange
         Task task = new Task();
