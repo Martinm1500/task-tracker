@@ -188,6 +188,26 @@ public class TaskControllerIntegrationTest {
     }
 
     @Test
+    void getTaskById_ShouldReturnNotFoundForInvalidId() {
+        // Arrange
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtToken);
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/api/tasks/999",
+                HttpMethod.GET,
+                request,
+                String.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
     void getTaskById_ShouldReturnForbiddenWhenNotAuthenticated() {
         // Act
         ResponseEntity<String> response = restTemplate.exchange(
