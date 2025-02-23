@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 public record TaskCreateDTO(
+        String title,
         @NotNull(message = "Priority cannot be null")
         Priority priority,
 

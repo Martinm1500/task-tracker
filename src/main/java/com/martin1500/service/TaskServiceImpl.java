@@ -31,6 +31,7 @@ public class TaskServiceImpl implements TaskService {
         User authenticatedUser = userContextService.getAuthenticatedUser();
         Task newTask = taskCreateDTOtoTask(taskCreateDTO);
         newTask.setUser(authenticatedUser);
+        newTask.setTitle(taskCreateDTO.title());
         newTask.setStatus(Status.PENDING);
         Task createdTask = taskRepository.save(newTask);
         return taskToTaskDTO(createdTask);
