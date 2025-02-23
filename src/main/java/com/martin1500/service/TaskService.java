@@ -23,6 +23,8 @@ public interface TaskService {
 
     TaskDTO updateTask(Long id, TaskDTO taskDTO);
 
+    TaskDTO updateTaskStatus(Long id, Status status);
+
     List<TaskDTO> getTasksByStatus(Status status);
 
     List<TaskDTO> getTasksByPriority(Priority priority);

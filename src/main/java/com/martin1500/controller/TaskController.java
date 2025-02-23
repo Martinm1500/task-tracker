@@ -48,6 +48,13 @@ public class TaskController {
         return ResponseEntity.ok(updatedTaskDTO);
     }
 
+    @PutMapping("/{id}/status/{status}")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<TaskDTO> updateTaskStatus(@PathVariable Long id, @PathVariable Status status) {
+        TaskDTO updatedTaskDTO = taskService.updateTaskStatus(id, status);
+        return ResponseEntity.ok(updatedTaskDTO);
+    }
+
     @GetMapping("/status/{status}")
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<List<TaskDTO>> getTasksByStatus(@PathVariable Status status) {

@@ -74,6 +74,21 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
+    public TaskDTO updateTaskStatus(Long id, Status status) {
+        User authenticatedUser = userContextService.getAuthenticatedUser();
+
+        Task task = taskRepository.findByIdAndUser(id, authenticatedUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
+
+        task.setStatus(status);
+        task.setUpdatedAt(LocalDateTime.now());
+
+        Task updatedTask = taskRepository.save(task);
+        return taskToTaskDTO(updatedTask);
+    }
+
+    @Override
     public List<TaskDTO> getTasksByStatus(Status status) {
         User authenticatedUser = userContextService.getAuthenticatedUser();
 
