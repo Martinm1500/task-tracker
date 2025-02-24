@@ -1,8 +1,6 @@
 package com.martin1500.service;
 
-import com.martin1500.dto.AuthResponse;
-import com.martin1500.dto.LoginRequest;
-import com.martin1500.dto.RegisterRequest;
+import com.martin1500.dto.*;
 import com.martin1500.model.User;
 import com.martin1500.model.util.Role;
 import com.martin1500.repository.UserRepository;
@@ -24,15 +22,15 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     public AuthResponse login(LoginRequest request) {
-
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.username(), request.password())
+        );
 
         User user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new UsernameNotFoundException("Username Not Found."));
 
-        String token=jwtService.generateToken(user.getUsername());
-
-        return new AuthResponse(token);
+        TokenPair tokenPair = jwtService.generateTokenPair(user.getUsername());
+        return new AuthResponse(tokenPair.accessToken(), tokenPair.refreshToken());
     }
 
     @Transactional
@@ -40,14 +38,17 @@ public class AuthService {
         User user = User.builder()
                 .username(request.username())
                 .email(request.email())
-                .password(passwordEncoder.encode( request.password()))
+                .password(passwordEncoder.encode(request.password()))
                 .role(Role.USER)
                 .build();
 
         userRepository.save(user);
 
-        String token=jwtService.generateToken(user.getUsername());
+        TokenPair tokenPair = jwtService.generateTokenPair(user.getUsername());
+        return new AuthResponse(tokenPair.accessToken(), tokenPair.refreshToken());
+    }
 
-        return new AuthResponse(token);
+    public String refreshToken(RefreshRequest request) {
+        return jwtService.refreshAccessToken(request.refreshToken());
     }
 }

@@ -2,6 +2,7 @@ package com.martin1500.controller;
 
 import com.martin1500.dto.AuthResponse;
 import com.martin1500.dto.LoginRequest;
+import com.martin1500.dto.RefreshRequest;
 import com.martin1500.dto.RegisterRequest;
 import com.martin1500.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +27,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<String> refreshToken(@RequestBody RefreshRequest request) {
+        String newAccessToken = authService.refreshToken(request);
+        return ResponseEntity.ok(newAccessToken);
     }
 }

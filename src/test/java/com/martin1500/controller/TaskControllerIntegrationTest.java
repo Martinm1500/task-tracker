@@ -2,6 +2,7 @@ package com.martin1500.controller;
 
 import com.martin1500.dto.TaskCreateDTO;
 import com.martin1500.dto.TaskDTO;
+import com.martin1500.dto.TokenPair;
 import com.martin1500.model.Task;
 import com.martin1500.model.User;
 import com.martin1500.model.util.Priority;
@@ -50,7 +51,7 @@ public class TaskControllerIntegrationTest {
     @Autowired
     private JwtService jwtService;
 
-    private String jwtToken;
+    private String accessToken;
 
     @Autowired
     private UserRepository userRepository;
@@ -73,7 +74,8 @@ public class TaskControllerIntegrationTest {
         authenticatedUser.setRole(Role.USER);
         authenticatedUser = userRepository.save(authenticatedUser);
 
-        jwtToken = jwtService.generateToken(authenticatedUser.getUsername());
+        TokenPair tokenPair = jwtService.generateTokenPair(authenticatedUser.getUsername());
+        accessToken = tokenPair.accessToken();
     }
 
     @AfterEach
@@ -85,11 +87,11 @@ public class TaskControllerIntegrationTest {
     @Test
     void createTask_ShouldReturnTaskDTO() {
         // Arrange
-        TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Task 1",Priority.LOW, LocalDate.now().plusDays(1), "test comments");
+        TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Task 1", Priority.LOW, LocalDate.now().plusDays(1), "test comments");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(jwtToken);
+        headers.setBearerAuth(accessToken);
 
         HttpEntity<TaskCreateDTO> request = new HttpEntity<>(taskCreateDTO, headers);
 
@@ -132,7 +134,7 @@ public class TaskControllerIntegrationTest {
         taskRepository.save(task2);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(jwtToken);
+        headers.setBearerAuth(accessToken);
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
@@ -166,7 +168,7 @@ public class TaskControllerIntegrationTest {
         task = taskRepository.save(task);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(jwtToken);
+        headers.setBearerAuth(accessToken);
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
@@ -191,7 +193,7 @@ public class TaskControllerIntegrationTest {
     void getTaskById_ShouldReturnNotFoundForInvalidId() {
         // Arrange
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(jwtToken);
+        headers.setBearerAuth(accessToken);
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
@@ -244,7 +246,7 @@ public class TaskControllerIntegrationTest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(jwtToken);
+        headers.setBearerAuth(accessToken);
 
         HttpEntity<TaskDTO> request = new HttpEntity<>(updatedTaskDTO, headers);
 
@@ -279,7 +281,7 @@ public class TaskControllerIntegrationTest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(jwtToken);
+        headers.setBearerAuth(accessToken);
 
         HttpEntity<TaskDTO> request = new HttpEntity<>(updatedTaskDTO, headers);
 
@@ -294,5 +296,4 @@ public class TaskControllerIntegrationTest {
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
-
 }

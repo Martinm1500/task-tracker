@@ -1,8 +1,6 @@
 package com.martin1500.service;
 
-import com.martin1500.dto.AuthResponse;
-import com.martin1500.dto.LoginRequest;
-import com.martin1500.dto.RegisterRequest;
+import com.martin1500.dto.*;
 import com.martin1500.model.User;
 import com.martin1500.model.util.Role;
 import com.martin1500.repository.UserRepository;
@@ -41,12 +39,13 @@ public class TestAuthService {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    void register_ValidRequest_ReturnsAuthResponseWithToken() {
+    void register_ValidRequest_ReturnsAuthResponseWithTokenPair() {
         String username = "newUser";
         String email = "newUser@example.com";
         String password = "securePassword";
         String encodedPassword = "encodedPassword";
-        String generatedToken = "mockToken";
+        String accessToken = "mockAccessToken";
+        String refreshToken = "mockRefreshToken";
 
         RegisterRequest request = new RegisterRequest(username, email, password);
         User user = User.builder()
@@ -58,23 +57,25 @@ public class TestAuthService {
 
         // Mocks
         when(passwordEncoder.encode(password)).thenReturn(encodedPassword);
-        when(jwtService.generateToken(username)).thenReturn(generatedToken);
+        when(jwtService.generateTokenPair(username)).thenReturn(new TokenPair(accessToken, refreshToken));
 
         AuthResponse response = authService.register(request);
 
         verify(passwordEncoder).encode(password);
         verify(userRepository).save(any(User.class));
-        verify(jwtService).generateToken(username);
+        verify(jwtService).generateTokenPair(username);
 
         assertNotNull(response);
-        assertEquals(generatedToken, response.token());
+        assertEquals(accessToken, response.accessToken());
+        assertEquals(refreshToken, response.refreshToken());
     }
 
     @Test
-    void login_ValidCredentials_ReturnsAuthResponseWithToken() {
+    void login_ValidCredentials_ReturnsAuthResponseWithTokenPair() {
         String username = "testUser";
         String password = "testPassword";
-        String generatedToken = "mockToken";
+        String accessToken = "mockAccessToken";
+        String refreshToken = "mockRefreshToken";
 
         LoginRequest loginRequest = new LoginRequest(username, password);
         User user = new User();
@@ -83,16 +84,33 @@ public class TestAuthService {
 
         // Mocks
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(username)).thenReturn(generatedToken);
-
+        when(jwtService.generateTokenPair(username)).thenReturn(new TokenPair(accessToken, refreshToken));
 
         AuthResponse response = authService.login(loginRequest);
 
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(userRepository).findByUsername(username);
-        verify(jwtService).generateToken(username);
+        verify(jwtService).generateTokenPair(username);
 
         assertNotNull(response);
-        assertEquals(generatedToken, response.token());
+        assertEquals(accessToken, response.accessToken());
+        assertEquals(refreshToken, response.refreshToken());
+    }
+
+    @Test
+    void refreshToken_ValidRefreshToken_ReturnsNewAccessToken() {
+        String refreshToken = "mockRefreshToken";
+        String newAccessToken = "newMockAccessToken";
+        RefreshRequest request = new RefreshRequest(refreshToken);
+
+        // Mocks
+        when(jwtService.refreshAccessToken(refreshToken)).thenReturn(newAccessToken);
+
+        String result = authService.refreshToken(request);
+
+        verify(jwtService).refreshAccessToken(refreshToken);
+
+        assertNotNull(result);
+        assertEquals(newAccessToken, result);
     }
 }

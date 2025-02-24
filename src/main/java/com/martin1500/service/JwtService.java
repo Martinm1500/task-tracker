@@ -3,6 +3,7 @@ import java.security.Key;
 import java.util.*;
 import java.util.function.Function;
 
+import com.martin1500.dto.TokenPair;
 import com.martin1500.exception.MissingSecretKeyException;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
@@ -22,22 +23,32 @@ public class JwtService {
     @Value("${jwt.secretKey:${JWT_SECRET_KEY}}")
     private String secretKey;
 
-    @Value("${jwt.expirationTime:1800000}")
-    private long EXPIRATION_TIME;
+    @Value("${jwt.accessTokenExpiration:900000}")
+    private long ACCESS_TOKEN_EXPIRATION;
 
-    public String generateToken(String username) {
-        return generateToken(Collections.emptyMap(), username);
+    @Value("${jwt.refreshTokenExpiration:604800000}")
+    private long REFRESH_TOKEN_EXPIRATION;
+
+    public TokenPair generateTokenPair(String username) {
+        return new TokenPair(generateAccessToken(username), generateRefreshToken(username));
     }
 
-    public String generateToken(Map<String, Object> claims, String username) {
+    public String generateAccessToken(String username) {
+        return generateToken(Collections.emptyMap(), username, ACCESS_TOKEN_EXPIRATION);
+    }
 
+    public String generateRefreshToken(String username) {
+        return generateToken(Collections.emptyMap(), username, REFRESH_TOKEN_EXPIRATION);
+    }
+
+    private String generateToken(Map<String, Object> claims, String username, long expirationTime) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be null or empty");
         }
 
         try {
             Date now = new Date();
-            Date expiryDate = new Date(now.getTime() + EXPIRATION_TIME);
+            Date expiryDate = new Date(now.getTime() + expirationTime);
 
             return Jwts.builder()
                     .setClaims(claims)
@@ -72,8 +83,24 @@ public class JwtService {
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
+    public String refreshAccessToken(String refreshToken) {
+        try {
+            if (isTokenExpired(refreshToken)) {
+                throw new JwtException("Refresh token has expired");
+            }
+            String username = extractUsername(refreshToken);
+            return generateAccessToken(username);
+        } catch (ExpiredJwtException e) {
+            throw new JwtException("Refresh token has expired");
+        }
+    }
+
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        try {
+            return extractExpiration(token).before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
     public Date extractExpiration(String token) {
