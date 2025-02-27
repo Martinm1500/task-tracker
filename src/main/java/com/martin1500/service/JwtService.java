@@ -23,10 +23,10 @@ public class JwtService {
     @Value("${jwt.secretKey:${JWT_SECRET_KEY}}")
     private String secretKey;
 
-    @Value("${jwt.accessTokenExpiration:900000}")
+    @Value("${jwt.accessTokenExpiration:3600000}")
     private long ACCESS_TOKEN_EXPIRATION;
 
-    @Value("${jwt.refreshTokenExpiration:604800000}")
+    @Value("${jwt.refreshTokenExpiration:15552000000}")
     private long REFRESH_TOKEN_EXPIRATION;
 
     public TokenPair generateTokenPair(String username) {
@@ -57,9 +57,9 @@ public class JwtService {
                     .setExpiration(expiryDate)
                     .signWith(getSignKey(), SignatureAlgorithm.HS256)
                     .compact();
-        } catch (SecurityException e) {
+        } catch (Exception e) {
             log.error("Error generating JWT token: {}", e.getMessage());
-            throw new JwtException("Failed to generate JWT token due to security issues.");
+            throw new JwtException("Failed to generate JWT token.", e);
         }
     }
 
@@ -79,8 +79,13 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        try {
+            final String username = extractUsername(token);
+            return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        } catch (Exception e) {
+            log.warn("Invalid JWT token: {}", e.getMessage());
+            return false;
+        }
     }
 
     public String refreshAccessToken(String refreshToken) {
@@ -96,11 +101,7 @@ public class JwtService {
     }
 
     private boolean isTokenExpired(String token) {
-        try {
-            return extractExpiration(token).before(new Date());
-        } catch (ExpiredJwtException e) {
-            return true;
-        }
+        return extractExpiration(token).before(new Date());
     }
 
     public Date extractExpiration(String token) {
