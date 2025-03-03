@@ -47,6 +47,9 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Task> createdTasks = new HashSet<>();
 
+    @ManyToMany(mappedBy = "assignees")
+    private Set<Task> assignedTasks = new HashSet<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

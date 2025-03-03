@@ -12,6 +12,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -47,6 +49,14 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "created_by_id", nullable = false)
     private User createdBy;
+
+    @ManyToMany
+    @JoinTable(
+            name = "task_assignees",
+            joinColumns = @JoinColumn(name = "task_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> assignees = new HashSet<>();
 
     private String comments;
 
