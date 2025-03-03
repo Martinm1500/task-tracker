@@ -113,21 +113,21 @@ public class TaskControllerIntegrationTest {
         // Verify
         Task savedTask = taskRepository.findById(response.getBody().getId()).orElse(null);
         assertNotNull(savedTask);
-        assertEquals(authenticatedUser.getId(), savedTask.getUser().getId());
+        assertEquals(authenticatedUser.getId(), savedTask.getCreatedBy().getId());
     }
 
     @Test
     void getTasks_ShouldReturnTasksForAuthenticatedUser() {
         // Arrange
         Task task1 = new Task();
-        task1.setUser(authenticatedUser);
+        task1.setCreatedBy(authenticatedUser);
         task1.setPriority(Priority.LOW);
         task1.setDueDate(LocalDate.now().plusDays(1));
         task1.setComments("Task 1 comments");
         taskRepository.save(task1);
 
         Task task2 = new Task();
-        task2.setUser(authenticatedUser);
+        task2.setCreatedBy(authenticatedUser);
         task2.setPriority(Priority.HIGH);
         task2.setDueDate(LocalDate.now().plusDays(2));
         task2.setComments("Task 2 comments");
@@ -161,7 +161,7 @@ public class TaskControllerIntegrationTest {
     void getTaskById_ShouldReturnTaskDTO() {
         // Arrange
         Task task = new Task();
-        task.setUser(authenticatedUser);
+        task.setCreatedBy(authenticatedUser);
         task.setPriority(Priority.LOW);
         task.setDueDate(LocalDate.now().plusDays(1));
         task.setComments("Test task comments");
@@ -227,7 +227,7 @@ public class TaskControllerIntegrationTest {
     void updateTask_ShouldReturnUpdatedTaskDTO() {
         // Arrange
         Task task = new Task();
-        task.setUser(authenticatedUser);
+        task.setCreatedBy(authenticatedUser);
         task.setTitle("Original Title");
         task.setDescription("Original Description");
         task.setStatus(Status.PENDING);

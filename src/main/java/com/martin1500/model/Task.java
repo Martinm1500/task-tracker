@@ -45,8 +45,8 @@ public class Task {
     private LocalDateTime updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "created_by_id", nullable = false)
+    private User createdBy;
 
     private String comments;
 

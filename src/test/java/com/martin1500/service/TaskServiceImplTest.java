@@ -90,7 +90,7 @@ public class TaskServiceImplTest {
         //Verify
         Task savedTask = taskRepository.findById(result.getId()).orElse(null);
         assertNotNull(savedTask);
-        assertEquals(authenticatedUser.getId(), savedTask.getUser().getId());
+        assertEquals(authenticatedUser.getId(), savedTask.getCreatedBy().getId());
     }
 
     @Test
@@ -102,7 +102,7 @@ public class TaskServiceImplTest {
         task1.setPriority(Priority.HIGH);
         task1.setDueDate(LocalDate.now().plusDays(1));
         task1.setStatus(Status.PENDING);
-        task1.setUser(authenticatedUser);
+        task1.setCreatedBy(authenticatedUser);
         taskRepository.save(task1);
 
         Task task2 = new Task();
@@ -111,7 +111,7 @@ public class TaskServiceImplTest {
         task2.setPriority(Priority.MEDIUM);
         task2.setDueDate(LocalDate.now().plusDays(1));
         task2.setStatus(Status.PENDING);
-        task2.setUser(authenticatedUser);
+        task2.setCreatedBy(authenticatedUser);
         taskRepository.save(task2);
 
         // Act
@@ -133,7 +133,7 @@ public class TaskServiceImplTest {
         task1.setPriority(Priority.HIGH);
         task1.setDueDate(LocalDate.now().plusDays(1));
         task1.setStatus(Status.PENDING);
-        task1.setUser(authenticatedUser);
+        task1.setCreatedBy(authenticatedUser);
         Task savedTask = taskRepository.save(task1);
 
         // Act
@@ -156,7 +156,7 @@ public class TaskServiceImplTest {
         task1.setDueDate(LocalDate.now().plusDays(1));
         task1.setComments("First comments");
 
-        task1.setUser(authenticatedUser);
+        task1.setCreatedBy(authenticatedUser);
         Task savedTask = taskRepository.save(task1);
 
         Long taskId = savedTask.getId();
@@ -198,7 +198,7 @@ public class TaskServiceImplTest {
         task1.setPriority(Priority.LOW);
         task1.setDueDate(LocalDate.now().plusDays(1));
 
-        task1.setUser(authenticatedUser);
+        task1.setCreatedBy(authenticatedUser);
         taskRepository.save(task1);
 
         Task task2 = new Task();
@@ -206,7 +206,7 @@ public class TaskServiceImplTest {
         task2.setPriority(Priority.LOW);
         task2.setDueDate(LocalDate.now().plusDays(1));
 
-        task2.setUser(authenticatedUser);
+        task2.setCreatedBy(authenticatedUser);
         taskRepository.save(task2);
 
         Task task3 = new Task();
@@ -214,7 +214,7 @@ public class TaskServiceImplTest {
         task3.setPriority(Priority.LOW);
         task3.setDueDate(LocalDate.now().plusDays(1));
 
-        task3.setUser(authenticatedUser);
+        task3.setCreatedBy(authenticatedUser);
         taskRepository.save(task3);
 
         Task task4 = new Task();
@@ -222,7 +222,7 @@ public class TaskServiceImplTest {
         task4.setPriority(Priority.LOW);
         task4.setDueDate(LocalDate.now().plusDays(1));
 
-        task4.setUser(authenticatedUser);
+        task4.setCreatedBy(authenticatedUser);
         taskRepository.save(task4);
 
         //Act
@@ -243,7 +243,7 @@ public class TaskServiceImplTest {
         task1.setPriority(Priority.LOW);
         task1.setDueDate(LocalDate.now().plusDays(1));
 
-        task1.setUser(authenticatedUser);
+        task1.setCreatedBy(authenticatedUser);
         taskRepository.save(task1);
 
         Task task2 = new Task();
@@ -251,7 +251,7 @@ public class TaskServiceImplTest {
         task2.setPriority(Priority.LOW);
         task2.setDueDate(LocalDate.now().plusDays(1));
 
-        task2.setUser(authenticatedUser);
+        task2.setCreatedBy(authenticatedUser);
         taskRepository.save(task2);
 
         Task task3 = new Task();
@@ -259,7 +259,7 @@ public class TaskServiceImplTest {
         task3.setPriority(Priority.LOW);
         task3.setDueDate(LocalDate.now().plusDays(1));
 
-        task3.setUser(authenticatedUser);
+        task3.setCreatedBy(authenticatedUser);
         taskRepository.save(task3);
 
         Task task4 = new Task();
@@ -267,7 +267,7 @@ public class TaskServiceImplTest {
         task4.setPriority(Priority.HIGH);
         task4.setDueDate(LocalDate.now().plusDays(1));
 
-        task4.setUser(authenticatedUser);
+        task4.setCreatedBy(authenticatedUser);
         taskRepository.save(task4);
 
         //Act
@@ -288,7 +288,7 @@ public class TaskServiceImplTest {
         task1.setPriority(Priority.LOW);
         task1.setDueDate(LocalDate.now().minusDays(1));
 
-        task1.setUser(authenticatedUser);
+        task1.setCreatedBy(authenticatedUser);
         taskRepository.save(task1);
 
         Task task2 = new Task();
@@ -297,7 +297,7 @@ public class TaskServiceImplTest {
         task2.setPriority(Priority.LOW);
         task2.setDueDate(LocalDate.now().minusDays(1));
 
-        task2.setUser(authenticatedUser);
+        task2.setCreatedBy(authenticatedUser);
         taskRepository.save(task2);
 
         Task task3 = new Task();
@@ -306,7 +306,7 @@ public class TaskServiceImplTest {
         task3.setPriority(Priority.LOW);
         task3.setDueDate(LocalDate.now().minusDays(1));
 
-        task3.setUser(authenticatedUser);
+        task3.setCreatedBy(authenticatedUser);
         taskRepository.save(task3);
 
         Task task4 = new Task();
@@ -315,7 +315,7 @@ public class TaskServiceImplTest {
         task4.setPriority(Priority.LOW);
         task4.setDueDate(LocalDate.now().plusDays(1));
 
-        task4.setUser(authenticatedUser);
+        task4.setCreatedBy(authenticatedUser);
         taskRepository.save(task4);
 
         //Act

@@ -13,15 +13,15 @@ import java.util.Optional;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long > {
-    List<Task> findByUserOrderByPriorityAscDueDateAsc(User user);
+    List<Task> findByCreatedByOrderByPriorityAscDueDateAsc(User user);
 
-    Optional<Task> findByIdAndUser(Long id, User user);
+    Optional<Task> findByIdAndCreatedBy(Long id, User user);
 
-    List<Task> findByUserAndStatus(User user, Status status);
+    List<Task> findByCreatedByAndStatus(User user, Status status);
 
-    List<Task> findByUserAndPriority(User user, Priority priority);
+    List<Task> findByCreatedByAndPriority(User user, Priority priority);
 
-    List<Task> findByUserAndDueDateBefore(User user, LocalDate dueDate);
+    List<Task> findByCreatedByAndDueDateBefore(User user, LocalDate dueDate);
 
-    boolean existsByTitleAndUser(String title, User user);
+    boolean existsByTitleAndCreatedBy(String title, User user);
 }

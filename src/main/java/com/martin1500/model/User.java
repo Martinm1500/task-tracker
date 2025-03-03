@@ -19,8 +19,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"tasks"})
-@ToString(exclude = {"tasks"})
+@EqualsAndHashCode(exclude = {"createdTasks"})
+@ToString(exclude = {"createdTasks"})
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
@@ -44,8 +44,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final Set<Task> tasks = new HashSet<>();
+    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Task> createdTasks = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

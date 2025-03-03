@@ -30,7 +30,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskDTO createTask(TaskCreateDTO taskCreateDTO) {
         User authenticatedUser = userContextService.getAuthenticatedUser();
         Task newTask = taskCreateDTOtoTask(taskCreateDTO);
-        newTask.setUser(authenticatedUser);
+        newTask.setCreatedBy(authenticatedUser);
         newTask.setTitle(taskCreateDTO.title());
         newTask.setStatus(Status.PENDING);
         Task createdTask = taskRepository.save(newTask);
@@ -40,7 +40,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<TaskDTO> getTasksForCurrentUser() {
         User authenticatedUser = userContextService.getAuthenticatedUser();
-        List<Task> tasks = taskRepository.findByUserOrderByPriorityAscDueDateAsc(authenticatedUser);
+        List<Task> tasks = taskRepository.findByCreatedByOrderByPriorityAscDueDateAsc(authenticatedUser);
 
         return convertTasksToDTOs(tasks);
     }
@@ -48,7 +48,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskDTO getTaskById(Long id) {
         User authenticatedUser = userContextService.getAuthenticatedUser();
-        Task task = taskRepository.findByIdAndUser(id, authenticatedUser)
+        Task task = taskRepository.findByIdAndCreatedBy(id, authenticatedUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
         return taskToTaskDTO(task);
     }
@@ -58,7 +58,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskDTO updateTask(Long id, TaskDTO taskDTO) {
         User authenticatedUser = userContextService.getAuthenticatedUser();
 
-        Task task = taskRepository.findByIdAndUser(id, authenticatedUser)
+        Task task = taskRepository.findByIdAndCreatedBy(id, authenticatedUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
 
         task.setTitle(taskDTO.getTitle());
@@ -79,7 +79,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskDTO updateTaskStatus(Long id, Status status) {
         User authenticatedUser = userContextService.getAuthenticatedUser();
 
-        Task task = taskRepository.findByIdAndUser(id, authenticatedUser)
+        Task task = taskRepository.findByIdAndCreatedBy(id, authenticatedUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
 
         task.setStatus(status);
@@ -93,7 +93,7 @@ public class TaskServiceImpl implements TaskService {
     public List<TaskDTO> getTasksByStatus(Status status) {
         User authenticatedUser = userContextService.getAuthenticatedUser();
 
-        List<Task> tasks = taskRepository.findByUserAndStatus(authenticatedUser, status);
+        List<Task> tasks = taskRepository.findByCreatedByAndStatus(authenticatedUser, status);
 
         return convertTasksToDTOs(tasks);
     }
@@ -102,7 +102,7 @@ public class TaskServiceImpl implements TaskService {
     public List<TaskDTO> getTasksByPriority(Priority priority) {
         User authenticatedUser = userContextService.getAuthenticatedUser();
 
-        List<Task> tasks = taskRepository.findByUserAndPriority(authenticatedUser, priority);
+        List<Task> tasks = taskRepository.findByCreatedByAndPriority(authenticatedUser, priority);
 
         return convertTasksToDTOs(tasks);
     }
@@ -112,7 +112,7 @@ public class TaskServiceImpl implements TaskService {
         User authenticatedUser = userContextService.getAuthenticatedUser();
         LocalDate currentDate = LocalDate.now();
 
-        List<Task> tasks = taskRepository.findByUserAndDueDateBefore(authenticatedUser, currentDate);
+        List<Task> tasks = taskRepository.findByCreatedByAndDueDateBefore(authenticatedUser, currentDate);
 
         return convertTasksToDTOs(tasks);
     }
