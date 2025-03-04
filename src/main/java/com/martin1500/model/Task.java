@@ -59,7 +59,7 @@ public class Task {
     private Set<User> assignees = new HashSet<>();
 
     @ManyToOne
-    @JoinColumn(name = "project_id", nullable = false)
+    @JoinColumn(name = "project_id")
     private Project project;
 
     private String comments;
