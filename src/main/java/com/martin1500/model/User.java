@@ -50,6 +50,9 @@ public class User implements UserDetails {
     @ManyToMany(mappedBy = "assignees")
     private Set<Task> assignedTasks = new HashSet<>();
 
+    @ManyToMany(mappedBy = "members")
+    private Set<Project> projects = new HashSet<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

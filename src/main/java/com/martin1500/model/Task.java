@@ -58,6 +58,10 @@ public class Task {
     )
     private Set<User> assignees = new HashSet<>();
 
+    @ManyToOne
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
+
     private String comments;
 
 }
