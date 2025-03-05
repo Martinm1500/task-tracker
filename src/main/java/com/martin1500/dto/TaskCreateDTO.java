@@ -12,6 +12,8 @@ public record TaskCreateDTO(
         @NotNull(message = "Priority cannot be null")
         Priority priority,
 
+        Long projectId,
+
         @Future(message = "Due date must be in the future")
         @NotNull(message = "Due date cannot be null")
         LocalDate dueDate,

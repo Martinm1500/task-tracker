@@ -87,7 +87,7 @@ public class TaskControllerIntegrationTest {
     @Test
     void createTask_ShouldReturnTaskDTO() {
         // Arrange
-        TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Task 1", Priority.LOW, LocalDate.now().plusDays(1), "test comments");
+        TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Task 1", Priority.LOW, null , LocalDate.now().plusDays(1), "test comments");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

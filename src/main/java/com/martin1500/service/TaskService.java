@@ -30,4 +30,8 @@ public interface TaskService {
     List<TaskDTO> getTasksByPriority(Priority priority);
 
     List<TaskDTO> getOverdueTasks();
+
+    List<TaskDTO> getTasksByProject(Long projectId);
+    TaskDTO addAssignee(Long taskId, Long userId);
+    TaskDTO removeAssignee(Long taskId, Long userId);
 }

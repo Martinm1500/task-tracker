@@ -43,6 +43,8 @@ public class TaskDTO {
 
     private LocalDateTime updatedAt;
 
+    private Long projectId;
+
     @Size(max = 255, message = "Comments cannot exceed 255 characters")
     private String comments;
 }

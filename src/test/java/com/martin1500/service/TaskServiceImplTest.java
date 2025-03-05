@@ -76,7 +76,7 @@ public class TaskServiceImplTest {
     @Test
     void createTask_ShouldReturnTaskDTO() {
         //Arrange
-        TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Task 1", Priority.LOW, LocalDate.now().plusDays(1),"test comments");
+        TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Task 1", Priority.LOW, null ,LocalDate.now().plusDays(1),"test comments");
 
         // Act
         TaskDTO result = taskService.createTask(taskCreateDTO);

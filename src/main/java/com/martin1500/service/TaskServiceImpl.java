@@ -7,7 +7,9 @@ import com.martin1500.model.Task;
 import com.martin1500.model.User;
 import com.martin1500.model.util.Priority;
 import com.martin1500.model.util.Status;
+import com.martin1500.repository.ProjectRepository;
 import com.martin1500.repository.TaskRepository;
+import com.martin1500.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +24,8 @@ import java.util.stream.Collectors;
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
-
+    private final UserRepository userRepository;
+    private final ProjectRepository projectRepository;
     private final UserContextService userContextService;
 
     @Override
@@ -30,9 +33,12 @@ public class TaskServiceImpl implements TaskService {
     public TaskDTO createTask(TaskCreateDTO taskCreateDTO) {
         User authenticatedUser = userContextService.getAuthenticatedUser();
         Task newTask = taskCreateDTOtoTask(taskCreateDTO);
+        newTask.setProject(projectRepository.findById(taskCreateDTO.projectId())
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + taskCreateDTO.projectId())));
         newTask.setCreatedBy(authenticatedUser);
         newTask.setTitle(taskCreateDTO.title());
         newTask.setStatus(Status.PENDING);
+
         Task createdTask = taskRepository.save(newTask);
         return taskToTaskDTO(createdTask);
     }
@@ -117,6 +123,39 @@ public class TaskServiceImpl implements TaskService {
         return convertTasksToDTOs(tasks);
     }
 
+    @Override
+    public List<TaskDTO> getTasksByProject(Long projectId) {
+        User authenticatedUser = userContextService.getAuthenticatedUser();
+        List<Task> tasks = taskRepository.findByProjectIdAndCreatedBy(projectId, authenticatedUser);
+        return convertTasksToDTOs(tasks);
+    }
+
+    @Override
+    @Transactional
+    public TaskDTO addAssignee(Long taskId, Long userId) {
+        User authenticatedUser = userContextService.getAuthenticatedUser();
+        Task task = taskRepository.findByIdAndCreatedBy(taskId, authenticatedUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
+        User assignee = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        task.getAssignees().add(assignee);
+        Task updatedTask = taskRepository.save(task);
+        return taskToTaskDTO(updatedTask);
+    }
+
+    @Override
+    @Transactional
+    public TaskDTO removeAssignee(Long taskId, Long userId) {
+        User authenticatedUser = userContextService.getAuthenticatedUser();
+        Task task = taskRepository.findByIdAndCreatedBy(taskId, authenticatedUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
+        User assignee = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        task.getAssignees().remove(assignee);
+        Task updatedTask = taskRepository.save(task);
+        return taskToTaskDTO(updatedTask);
+    }
+
     private TaskDTO taskToTaskDTO(Task task){
         return TaskDTO.builder()
                 .id(task.getId())
@@ -125,6 +164,7 @@ public class TaskServiceImpl implements TaskService {
                 .priority(task.getPriority())
                 .dueDate(task.getDueDate())
                 .status(task.getStatus())
+                .projectId(task.getProject().getId())
                 .comments(task.getComments())
                 .createdAt(task.getCreatedAt())
                 .build();

@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -25,7 +26,6 @@ public class TaskController {
     public ResponseEntity<TaskDTO> createTask(@Valid @RequestBody TaskCreateDTO taskCreateDTO) {
         return ResponseEntity.ok(taskService.createTask(taskCreateDTO));
     }
-
 
     @GetMapping
     @PreAuthorize("hasAuthority('USER')")
@@ -73,5 +73,23 @@ public class TaskController {
     public ResponseEntity<List<TaskDTO>> getOverdueTasks() {
         List<TaskDTO> tasks = taskService.getOverdueTasks();
         return ResponseEntity.ok(tasks);
+    }
+
+    @GetMapping("/project/{projectId}")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<List<TaskDTO>> getTasksByProject(@PathVariable Long projectId) {
+        return ResponseEntity.ok(taskService.getTasksByProject(projectId));
+    }
+
+    @PostMapping("/{id}/assignees")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<TaskDTO> addAssignee(@PathVariable Long id, @RequestBody Map<String, Long> body) {
+        return ResponseEntity.ok(taskService.addAssignee(id, body.get("userId")));
+    }
+
+    @DeleteMapping("/{id}/assignees/{userId}")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<TaskDTO> removeAssignee(@PathVariable Long id, @PathVariable Long userId) {
+        return ResponseEntity.ok(taskService.removeAssignee(id, userId));
     }
 }

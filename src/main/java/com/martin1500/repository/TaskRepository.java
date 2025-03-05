@@ -24,4 +24,6 @@ public interface TaskRepository extends JpaRepository<Task, Long > {
     List<Task> findByCreatedByAndDueDateBefore(User user, LocalDate dueDate);
 
     boolean existsByTitleAndCreatedBy(String title, User user);
+
+    List<Task> findByProjectIdAndCreatedBy(Long projectId, User createdBy);
 }
