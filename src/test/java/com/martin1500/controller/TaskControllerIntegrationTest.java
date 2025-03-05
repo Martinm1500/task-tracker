@@ -31,6 +31,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -291,7 +292,7 @@ public class TaskControllerIntegrationTest {
         ResponseEntity<TaskDTO> response = restTemplate.exchange(
                 "/api/tasks/" + task.getId() + "/assignees", HttpMethod.POST, request, TaskDTO.class);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Expected 200 OK, got " + response.getStatusCode());
         assertNotNull(response.getBody());
         Task updatedTask = taskRepository.findById(task.getId()).orElseThrow();
         assertTrue(updatedTask.getAssignees().contains(assignee));
@@ -303,7 +304,8 @@ public class TaskControllerIntegrationTest {
         User assignee = userRepository.save(User.builder().username("assignee").email("assignee@gmail.com")
                 .password("password123").role(Role.USER).build());
         Task task = Task.builder().title("Task 1").createdBy(authenticatedUser).project(project)
-                .dueDate(LocalDate.now().plusDays(1)).priority(Priority.LOW).status(Status.PENDING).build();
+                .dueDate(LocalDate.now().plusDays(1)).priority(Priority.LOW).status(Status.PENDING)
+                .assignees(new HashSet<>()).build();
         task.getAssignees().add(assignee);
         taskRepository.save(task);
 

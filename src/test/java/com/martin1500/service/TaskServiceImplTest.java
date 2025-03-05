@@ -26,6 +26,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -233,7 +234,8 @@ public class TaskServiceImplTest {
     void addAssignee_ShouldAddUserToTask() {
         Project project = projectRepository.save(Project.builder().name("Project 1").build());
         Task task = taskRepository.save(Task.builder().title("Task 1").project(project).createdBy(authenticatedUser)
-                .dueDate(LocalDate.now().plusDays(1)).priority(Priority.LOW).status(Status.PENDING).build());
+                .dueDate(LocalDate.now().plusDays(1)).priority(Priority.LOW).status(Status.PENDING)
+                .assignees(new HashSet<>()).build());
         User assignee = userRepository.save(User.builder().username("assignee").email("assignee@gmail.com")
                 .password("password123").role(Role.USER).build());
 
@@ -250,7 +252,8 @@ public class TaskServiceImplTest {
         User assignee = userRepository.save(User.builder().username("assignee").email("assignee@gmail.com")
                 .password("password123").role(Role.USER).build());
         Task task = Task.builder().title("Task 1").project(project).createdBy(authenticatedUser)
-                .dueDate(LocalDate.now().plusDays(1)).priority(Priority.LOW).status(Status.PENDING).build();
+                .dueDate(LocalDate.now().plusDays(1)).priority(Priority.LOW).status(Status.PENDING)
+                .assignees(new HashSet<>()).build();
         task.getAssignees().add(assignee);
         taskRepository.save(task);
 
