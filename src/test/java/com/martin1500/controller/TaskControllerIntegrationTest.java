@@ -13,6 +13,7 @@ import com.martin1500.repository.ProjectRepository;
 import com.martin1500.repository.TaskRepository;
 import com.martin1500.repository.UserRepository;
 import com.martin1500.service.JwtService;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -272,6 +273,7 @@ public class TaskControllerIntegrationTest {
     }
 
     @Test
+    @Transactional
     void addAssignee_ShouldAddUserToTask() {
         Project project = projectRepository.save(Project.builder().name("Project 1").build());
         Task task = taskRepository.save(Task.builder().title("Task 1").createdBy(authenticatedUser).project(project)
