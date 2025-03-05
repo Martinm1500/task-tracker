@@ -218,7 +218,8 @@ public class TaskServiceImplTest {
     @Test
     void getTasksByProject_ShouldReturnTasksForProject() {
         Project project = projectRepository.save(Project.builder().name("Project 1").build());
-        Task task = taskRepository.save(Task.builder().title("Task 1").project(project).createdBy(authenticatedUser).build());
+        Task task = taskRepository.save(Task.builder().title("Task 1").project(project).createdBy(authenticatedUser)
+                .dueDate(LocalDate.now().plusDays(1)).priority(Priority.LOW).status(Status.PENDING).build());
 
         List<TaskDTO> result = taskService.getTasksByProject(project.getId());
 
@@ -231,8 +232,10 @@ public class TaskServiceImplTest {
     @Test
     void addAssignee_ShouldAddUserToTask() {
         Project project = projectRepository.save(Project.builder().name("Project 1").build());
-        Task task = taskRepository.save(Task.builder().title("Task 1").project(project).createdBy(authenticatedUser).build());
-        User assignee = userRepository.save(User.builder().username("assignee").email("assignee@gmail.com").password("pass").role(Role.USER).build());
+        Task task = taskRepository.save(Task.builder().title("Task 1").project(project).createdBy(authenticatedUser)
+                .dueDate(LocalDate.now().plusDays(1)).priority(Priority.LOW).status(Status.PENDING).build());
+        User assignee = userRepository.save(User.builder().username("assignee").email("assignee@gmail.com")
+                .password("password123").role(Role.USER).build());
 
         TaskDTO result = taskService.addAssignee(task.getId(), assignee.getId());
 
@@ -244,8 +247,10 @@ public class TaskServiceImplTest {
     @Test
     void removeAssignee_ShouldRemoveUserFromTask() {
         Project project = projectRepository.save(Project.builder().name("Project 1").build());
-        User assignee = userRepository.save(User.builder().username("assignee").email("assignee@gmail.com").password("pass").role(Role.USER).build());
-        Task task = Task.builder().title("Task 1").project(project).createdBy(authenticatedUser).build();
+        User assignee = userRepository.save(User.builder().username("assignee").email("assignee@gmail.com")
+                .password("password123").role(Role.USER).build());
+        Task task = Task.builder().title("Task 1").project(project).createdBy(authenticatedUser)
+                .dueDate(LocalDate.now().plusDays(1)).priority(Priority.LOW).status(Status.PENDING).build();
         task.getAssignees().add(assignee);
         taskRepository.save(task);
 
