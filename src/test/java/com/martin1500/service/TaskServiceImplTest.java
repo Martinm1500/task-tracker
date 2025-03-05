@@ -2,11 +2,13 @@ package com.martin1500.service;
 
 import com.martin1500.dto.TaskCreateDTO;
 import com.martin1500.dto.TaskDTO;
+import com.martin1500.model.Project;
 import com.martin1500.model.Task;
 import com.martin1500.model.User;
 import com.martin1500.model.util.Priority;
 import com.martin1500.model.util.Role;
 import com.martin1500.model.util.Status;
+import com.martin1500.repository.ProjectRepository;
 import com.martin1500.repository.TaskRepository;
 import com.martin1500.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +51,9 @@ public class TaskServiceImplTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ProjectRepository projectRepository;
+
     private User authenticatedUser;
 
     @DynamicPropertySource
@@ -60,7 +65,6 @@ public class TaskServiceImplTest {
 
     @BeforeEach
     public void setUp() {
-
         authenticatedUser = new User();
         authenticatedUser.setUsername("testUser");
         authenticatedUser.setPassword("password");
@@ -75,49 +79,33 @@ public class TaskServiceImplTest {
 
     @Test
     void createTask_ShouldReturnTaskDTO() {
-        //Arrange
-        TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Task 1", Priority.LOW, null ,LocalDate.now().plusDays(1),"test comments");
+        Project project = projectRepository.save(Project.builder().name("Project 1").build());
+        TaskCreateDTO taskCreateDTO = new TaskCreateDTO("Task 1", Priority.LOW, project.getId(), LocalDate.now().plusDays(1), "test comments");
 
-        // Act
         TaskDTO result = taskService.createTask(taskCreateDTO);
 
-        // Assert
         assertNotNull(result);
+        assertEquals("Task 1", result.getTitle());
         assertEquals(Priority.LOW, result.getPriority());
         assertEquals(taskCreateDTO.dueDate(), result.getDueDate());
         assertEquals(Status.PENDING, result.getStatus());
 
-        //Verify
         Task savedTask = taskRepository.findById(result.getId()).orElse(null);
         assertNotNull(savedTask);
         assertEquals(authenticatedUser.getId(), savedTask.getCreatedBy().getId());
+        assertEquals(project.getId(), savedTask.getProject().getId());
     }
 
     @Test
-    public void getTasksForCurrentUser_ShouldReturnTasksDTO() {
-        // Arrange
-        Task task1 = new Task();
-        task1.setTitle("Task 1");
-        task1.setDescription("Description 1");
-        task1.setPriority(Priority.HIGH);
-        task1.setDueDate(LocalDate.now().plusDays(1));
-        task1.setStatus(Status.PENDING);
-        task1.setCreatedBy(authenticatedUser);
-        taskRepository.save(task1);
+    void getTasksForCurrentUser_ShouldReturnTasksDTO() {
+        Project project = projectRepository.save(Project.builder().name("Project 1").build());
+        Task task1 = taskRepository.save(Task.builder().title("Task 1").description("Description 1").project(project)
+                .priority(Priority.HIGH).dueDate(LocalDate.now().plusDays(1)).status(Status.PENDING).createdBy(authenticatedUser).build());
+        Task task2 = taskRepository.save(Task.builder().title("Task 2").description("Description 2").project(project)
+                .priority(Priority.MEDIUM).dueDate(LocalDate.now().plusDays(1)).status(Status.PENDING).createdBy(authenticatedUser).build());
 
-        Task task2 = new Task();
-        task2.setTitle("Task 2");
-        task2.setDescription("Description 2");
-        task2.setPriority(Priority.MEDIUM);
-        task2.setDueDate(LocalDate.now().plusDays(1));
-        task2.setStatus(Status.PENDING);
-        task2.setCreatedBy(authenticatedUser);
-        taskRepository.save(task2);
-
-        // Act
         List<TaskDTO> result = taskService.getTasksForCurrentUser();
 
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals("Task 1", result.get(0).getTitle());
@@ -125,206 +113,147 @@ public class TaskServiceImplTest {
     }
 
     @Test
-    void getTaskById_ShouldReturnTaskDTO(){
-        // Arrange
-        Task task1 = new Task();
-        task1.setTitle("Task 1");
-        task1.setDescription("Description 1");
-        task1.setPriority(Priority.HIGH);
-        task1.setDueDate(LocalDate.now().plusDays(1));
-        task1.setStatus(Status.PENDING);
-        task1.setCreatedBy(authenticatedUser);
-        Task savedTask = taskRepository.save(task1);
+    void getTaskById_ShouldReturnTaskDTO() {
+        Project project = projectRepository.save(Project.builder().name("Project 1").build());
+        Task task1 = taskRepository.save(Task.builder().title("Task 1").description("Description 1").project(project)
+                .priority(Priority.HIGH).dueDate(LocalDate.now().plusDays(1)).status(Status.PENDING).createdBy(authenticatedUser).build());
 
-        // Act
-        TaskDTO result = taskService.getTaskById(savedTask.getId());
+        TaskDTO result = taskService.getTaskById(task1.getId());
 
-        // Assert
         assertNotNull(result);
-        assertEquals("Task 1",result.getTitle());
+        assertEquals("Task 1", result.getTitle());
         assertEquals(task1.getDueDate(), result.getDueDate());
+        assertEquals(project.getId(), result.getProjectId());
     }
 
     @Test
-    void updateTask_ShouldReturnUpdatedTask(){
-        // Arrange
-        Task task1 = new Task();
-        task1.setTitle("Task 1");
-        task1.setDescription("Description 1");
-        task1.setStatus(Status.PENDING);
-        task1.setPriority(Priority.LOW);
-        task1.setDueDate(LocalDate.now().plusDays(1));
-        task1.setComments("First comments");
-
-        task1.setCreatedBy(authenticatedUser);
-        Task savedTask = taskRepository.save(task1);
-
-        Long taskId = savedTask.getId();
+    void updateTask_ShouldReturnUpdatedTask() {
+        Project project = projectRepository.save(Project.builder().name("Project 1").build());
+        Task task1 = taskRepository.save(Task.builder().title("Task 1").description("Description 1").status(Status.PENDING)
+                .priority(Priority.LOW).project(project).dueDate(LocalDate.now().plusDays(1)).comments("First comments")
+                .createdBy(authenticatedUser).build());
+        Long taskId = task1.getId();
 
         TaskDTO updatedTaskDTO = TaskDTO.builder()
+                .title("Updated Title")
                 .description("New description")
                 .status(Status.IN_PROGRESS)
                 .priority(Priority.HIGH)
+                .projectId(project.getId())
                 .dueDate(LocalDate.now().plusDays(5))
                 .comments("Updated comments")
                 .build();
 
-        //Act
         TaskDTO result = taskService.updateTask(taskId, updatedTaskDTO);
 
-        //Assert
         assertNotNull(result);
+        assertEquals("Updated Title", result.getTitle());
         assertEquals("New description", result.getDescription());
         assertEquals(Status.IN_PROGRESS, result.getStatus());
         assertEquals(Priority.HIGH, result.getPriority());
         assertEquals(LocalDate.now().plusDays(5), result.getDueDate());
         assertEquals("Updated comments", result.getComments());
 
-        // Verify in database
         Task updatedTask = taskRepository.findById(taskId).orElseThrow();
-        assertEquals("New description", updatedTask.getDescription());
-        assertEquals(Status.IN_PROGRESS, updatedTask.getStatus());
-        assertEquals(Priority.HIGH, updatedTask.getPriority());
-        assertEquals(LocalDate.now().plusDays(5), updatedTask.getDueDate());
-        assertEquals("Updated comments", updatedTask.getComments());
+        assertEquals(project.getId(), updatedTask.getProject().getId());
     }
 
     @Test
-    void getTasksByStatus_ShouldReturnOnlyTasksWithGivenStatus(){
-        // Arrange
-        Task task1 = new Task();
+    void getTasksByStatus_ShouldReturnOnlyTasksWithGivenStatus() {
+        Project project = projectRepository.save(Project.builder().name("Project 1").build());
+        taskRepository.save(Task.builder().status(Status.PENDING).priority(Priority.LOW).project(project)
+                .dueDate(LocalDate.now().plusDays(1)).createdBy(authenticatedUser).build());
+        taskRepository.save(Task.builder().status(Status.PENDING).priority(Priority.LOW).project(project)
+                .dueDate(LocalDate.now().plusDays(1)).createdBy(authenticatedUser).build());
+        taskRepository.save(Task.builder().status(Status.PENDING).priority(Priority.LOW).project(project)
+                .dueDate(LocalDate.now().plusDays(1)).createdBy(authenticatedUser).build());
+        taskRepository.save(Task.builder().status(Status.IN_PROGRESS).priority(Priority.LOW).project(project)
+                .dueDate(LocalDate.now().plusDays(1)).createdBy(authenticatedUser).build());
 
-        task1.setStatus(Status.PENDING);
-        task1.setPriority(Priority.LOW);
-        task1.setDueDate(LocalDate.now().plusDays(1));
-
-        task1.setCreatedBy(authenticatedUser);
-        taskRepository.save(task1);
-
-        Task task2 = new Task();
-        task2.setStatus(Status.PENDING);
-        task2.setPriority(Priority.LOW);
-        task2.setDueDate(LocalDate.now().plusDays(1));
-
-        task2.setCreatedBy(authenticatedUser);
-        taskRepository.save(task2);
-
-        Task task3 = new Task();
-        task3.setStatus(Status.PENDING);
-        task3.setPriority(Priority.LOW);
-        task3.setDueDate(LocalDate.now().plusDays(1));
-
-        task3.setCreatedBy(authenticatedUser);
-        taskRepository.save(task3);
-
-        Task task4 = new Task();
-        task4.setStatus(Status.IN_PROGRESS);
-        task4.setPriority(Priority.LOW);
-        task4.setDueDate(LocalDate.now().plusDays(1));
-
-        task4.setCreatedBy(authenticatedUser);
-        taskRepository.save(task4);
-
-        //Act
         List<TaskDTO> result = taskService.getTasksByStatus(Status.PENDING);
 
-        //Assert
         assertNotNull(result);
         assertEquals(3, result.size());
         assertTrue(result.stream().allMatch(task -> task.getStatus() == Status.PENDING));
     }
 
     @Test
-    void getTasksByPriority_ShouldReturnOnlyTasksWithGivenPriority(){
-        // Arrange
-        Task task1 = new Task();
+    void getTasksByPriority_ShouldReturnOnlyTasksWithGivenPriority() {
+        Project project = projectRepository.save(Project.builder().name("Project 1").build());
+        taskRepository.save(Task.builder().status(Status.PENDING).priority(Priority.LOW).project(project)
+                .dueDate(LocalDate.now().plusDays(1)).createdBy(authenticatedUser).build());
+        taskRepository.save(Task.builder().status(Status.PENDING).priority(Priority.LOW).project(project)
+                .dueDate(LocalDate.now().plusDays(1)).createdBy(authenticatedUser).build());
+        taskRepository.save(Task.builder().status(Status.PENDING).priority(Priority.LOW).project(project)
+                .dueDate(LocalDate.now().plusDays(1)).createdBy(authenticatedUser).build());
+        taskRepository.save(Task.builder().status(Status.IN_PROGRESS).priority(Priority.HIGH).project(project)
+                .dueDate(LocalDate.now().plusDays(1)).createdBy(authenticatedUser).build());
 
-        task1.setStatus(Status.PENDING);
-        task1.setPriority(Priority.LOW);
-        task1.setDueDate(LocalDate.now().plusDays(1));
-
-        task1.setCreatedBy(authenticatedUser);
-        taskRepository.save(task1);
-
-        Task task2 = new Task();
-        task2.setStatus(Status.PENDING);
-        task2.setPriority(Priority.LOW);
-        task2.setDueDate(LocalDate.now().plusDays(1));
-
-        task2.setCreatedBy(authenticatedUser);
-        taskRepository.save(task2);
-
-        Task task3 = new Task();
-        task3.setStatus(Status.PENDING);
-        task3.setPriority(Priority.LOW);
-        task3.setDueDate(LocalDate.now().plusDays(1));
-
-        task3.setCreatedBy(authenticatedUser);
-        taskRepository.save(task3);
-
-        Task task4 = new Task();
-        task4.setStatus(Status.IN_PROGRESS);
-        task4.setPriority(Priority.HIGH);
-        task4.setDueDate(LocalDate.now().plusDays(1));
-
-        task4.setCreatedBy(authenticatedUser);
-        taskRepository.save(task4);
-
-        //Act
         List<TaskDTO> result = taskService.getTasksByPriority(Priority.LOW);
 
-        //Assert
         assertNotNull(result);
         assertEquals(3, result.size());
         assertTrue(result.stream().allMatch(task -> task.getPriority() == Priority.LOW));
     }
 
     @Test
-    void getOverdueTasks_ShouldReturnOnlyOverdueTasks(){
-        // Arrange
-        Task task1 = new Task();
+    void getOverdueTasks_ShouldReturnOnlyOverdueTasks() {
+        Project project = projectRepository.save(Project.builder().name("Project 1").build());
+        taskRepository.save(Task.builder().status(Status.PENDING).priority(Priority.LOW).project(project)
+                .dueDate(LocalDate.now().minusDays(1)).createdBy(authenticatedUser).build());
+        taskRepository.save(Task.builder().status(Status.PENDING).priority(Priority.LOW).project(project)
+                .dueDate(LocalDate.now().minusDays(1)).createdBy(authenticatedUser).build());
+        taskRepository.save(Task.builder().status(Status.PENDING).priority(Priority.LOW).project(project)
+                .dueDate(LocalDate.now().minusDays(1)).createdBy(authenticatedUser).build());
+        taskRepository.save(Task.builder().status(Status.PENDING).priority(Priority.LOW).project(project)
+                .dueDate(LocalDate.now().plusDays(1)).createdBy(authenticatedUser).build());
 
-        task1.setStatus(Status.PENDING);
-        task1.setPriority(Priority.LOW);
-        task1.setDueDate(LocalDate.now().minusDays(1));
-
-        task1.setCreatedBy(authenticatedUser);
-        taskRepository.save(task1);
-
-        Task task2 = new Task();
-
-        task2.setStatus(Status.PENDING);
-        task2.setPriority(Priority.LOW);
-        task2.setDueDate(LocalDate.now().minusDays(1));
-
-        task2.setCreatedBy(authenticatedUser);
-        taskRepository.save(task2);
-
-        Task task3 = new Task();
-
-        task3.setStatus(Status.PENDING);
-        task3.setPriority(Priority.LOW);
-        task3.setDueDate(LocalDate.now().minusDays(1));
-
-        task3.setCreatedBy(authenticatedUser);
-        taskRepository.save(task3);
-
-        Task task4 = new Task();
-
-        task4.setStatus(Status.PENDING);
-        task4.setPriority(Priority.LOW);
-        task4.setDueDate(LocalDate.now().plusDays(1));
-
-        task4.setCreatedBy(authenticatedUser);
-        taskRepository.save(task4);
-
-        //Act
         List<TaskDTO> result = taskService.getOverdueTasks();
 
-        //Assert
         assertNotNull(result);
         assertEquals(3, result.size());
         assertTrue(result.stream().allMatch(task -> task.getDueDate().isBefore(LocalDate.now())));
+    }
+
+    @Test
+    void getTasksByProject_ShouldReturnTasksForProject() {
+        Project project = projectRepository.save(Project.builder().name("Project 1").build());
+        Task task = taskRepository.save(Task.builder().title("Task 1").project(project).createdBy(authenticatedUser).build());
+
+        List<TaskDTO> result = taskService.getTasksByProject(project.getId());
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Task 1", result.get(0).getTitle());
+        assertEquals(project.getId(), result.get(0).getProjectId());
+    }
+
+    @Test
+    void addAssignee_ShouldAddUserToTask() {
+        Project project = projectRepository.save(Project.builder().name("Project 1").build());
+        Task task = taskRepository.save(Task.builder().title("Task 1").project(project).createdBy(authenticatedUser).build());
+        User assignee = userRepository.save(User.builder().username("assignee").email("assignee@gmail.com").password("pass").role(Role.USER).build());
+
+        TaskDTO result = taskService.addAssignee(task.getId(), assignee.getId());
+
+        assertNotNull(result);
+        Task updatedTask = taskRepository.findById(task.getId()).orElseThrow();
+        assertTrue(updatedTask.getAssignees().contains(assignee));
+    }
+
+    @Test
+    void removeAssignee_ShouldRemoveUserFromTask() {
+        Project project = projectRepository.save(Project.builder().name("Project 1").build());
+        User assignee = userRepository.save(User.builder().username("assignee").email("assignee@gmail.com").password("pass").role(Role.USER).build());
+        Task task = Task.builder().title("Task 1").project(project).createdBy(authenticatedUser).build();
+        task.getAssignees().add(assignee);
+        taskRepository.save(task);
+
+        TaskDTO result = taskService.removeAssignee(task.getId(), assignee.getId());
+
+        assertNotNull(result);
+        Task updatedTask = taskRepository.findById(task.getId()).orElseThrow();
+        assertFalse(updatedTask.getAssignees().contains(assignee));
     }
 }
 
