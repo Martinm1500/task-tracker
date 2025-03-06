@@ -77,10 +77,11 @@ public class TaskControllerIntegrationTest {
         taskRepository.deleteAll();
         userRepository.deleteAll();
         projectRepository.deleteAll();
+
         authenticatedUser = new User();
-        authenticatedUser.setUsername("testUser");
+        authenticatedUser.setUsername("testUser" + System.currentTimeMillis());
         authenticatedUser.setPassword("password");
-        authenticatedUser.setEmail("testemail@gmail.com");
+        authenticatedUser.setEmail("testemail" + System.currentTimeMillis() + "@gmail.com");
         authenticatedUser.setRole(Role.USER);
         authenticatedUser = userRepository.save(authenticatedUser);
 
