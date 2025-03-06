@@ -276,11 +276,25 @@ public class TaskControllerIntegrationTest {
     @Test
     @Transactional
     void addAssignee_ShouldAddUserToTask() {
+        // Arrange
         Project project = projectRepository.save(Project.builder().name("Project 1").build());
-        Task task = taskRepository.save(Task.builder().title("Task 1").createdBy(authenticatedUser).project(project)
-                .dueDate(LocalDate.now().plusDays(1)).priority(Priority.LOW).status(Status.PENDING).build());
-        User assignee = userRepository.save(User.builder().username("assignee").email("assignee@gmail.com")
-                .password("password123").role(Role.USER).build());
+        Task task = Task.builder()
+                .title("Task 1")
+                .createdBy(authenticatedUser)
+                .project(project)
+                .dueDate(LocalDate.now().plusDays(1))
+                .priority(Priority.LOW)
+                .status(Status.PENDING)
+                .assignees(new HashSet<>())
+                .build();
+        taskRepository.save(task);
+
+        User assignee = userRepository.save(User.builder()
+                .username("assignee")
+                .email("assignee@gmail.com")
+                .password("password123")
+                .role(Role.USER)
+                .build());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -289,9 +303,15 @@ public class TaskControllerIntegrationTest {
         Map<String, Long> body = Map.of("userId", assignee.getId());
         HttpEntity<Map<String, Long>> request = new HttpEntity<>(body, headers);
 
+        // Act
         ResponseEntity<TaskDTO> response = restTemplate.exchange(
-                "/api/tasks/" + task.getId() + "/assignees", HttpMethod.POST, request, TaskDTO.class);
+                "/api/tasks/" + task.getId() + "/assignees",
+                HttpMethod.POST,
+                request,
+                TaskDTO.class
+        );
 
+        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Expected 200 OK, got " + response.getStatusCode());
         assertNotNull(response.getBody());
         Task updatedTask = taskRepository.findById(task.getId()).orElseThrow();

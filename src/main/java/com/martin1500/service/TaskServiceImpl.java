@@ -139,6 +139,7 @@ public class TaskServiceImpl implements TaskService {
         User assignee = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         task.getAssignees().add(assignee);
+        task.getProject().getMembers().add(assignee);
         Task updatedTask = taskRepository.save(task);
         return taskToTaskDTO(updatedTask);
     }
