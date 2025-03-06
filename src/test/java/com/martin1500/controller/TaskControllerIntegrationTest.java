@@ -13,6 +13,8 @@ import com.martin1500.repository.ProjectRepository;
 import com.martin1500.repository.TaskRepository;
 import com.martin1500.repository.UserRepository;
 import com.martin1500.service.JwtService;
+import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -274,9 +276,9 @@ public class TaskControllerIntegrationTest {
     }
 
     @Test
+    @Transactional
     void addAssignee_ShouldAddUserToTask() {
-        // Arrange
-        Project project = projectRepository.save(Project.builder().name("Project 1").build());
+        Project project = projectRepository.save(Project.builder().name("Project 1").members(new HashSet<>()).build());
         Task task = Task.builder()
                 .title("Task 1")
                 .createdBy(authenticatedUser)
@@ -289,8 +291,8 @@ public class TaskControllerIntegrationTest {
         taskRepository.save(task);
 
         User assignee = userRepository.save(User.builder()
-                .username("assignee")
-                .email("assignee@gmail.com")
+                .username("assignee" + System.currentTimeMillis())
+                .email("assignee" + System.currentTimeMillis() + "@gmail.com")
                 .password("password123")
                 .role(Role.USER)
                 .build());
@@ -302,7 +304,6 @@ public class TaskControllerIntegrationTest {
         Map<String, Long> body = Map.of("userId", assignee.getId());
         HttpEntity<Map<String, Long>> request = new HttpEntity<>(body, headers);
 
-        // Act
         ResponseEntity<TaskDTO> response = restTemplate.exchange(
                 "/api/tasks/" + task.getId() + "/assignees",
                 HttpMethod.POST,
@@ -310,10 +311,11 @@ public class TaskControllerIntegrationTest {
                 TaskDTO.class
         );
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Expected 200 OK, got " + response.getStatusCode());
         assertNotNull(response.getBody());
+
         Task updatedTask = taskRepository.findById(task.getId()).orElseThrow();
+        Hibernate.initialize(updatedTask.getAssignees());
         assertTrue(updatedTask.getAssignees().contains(assignee));
     }
 
