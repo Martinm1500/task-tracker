@@ -231,6 +231,7 @@ public class TaskServiceImplTest {
     }
 
     @Test
+    @Transactional
     void addAssignee_ShouldAddUserToTask() {
         Project project = projectRepository.save(Project.builder().name("Project 1").members(new HashSet<>()).build());
         Task task = taskRepository.save(Task.builder().title("Task 1").project(project).createdBy(authenticatedUser)
