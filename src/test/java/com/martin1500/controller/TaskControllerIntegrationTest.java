@@ -74,6 +74,9 @@ public class TaskControllerIntegrationTest {
 
     @BeforeEach
     public void setUp() {
+        taskRepository.deleteAll();
+        userRepository.deleteAll();
+        projectRepository.deleteAll();
         authenticatedUser = new User();
         authenticatedUser.setUsername("testUser");
         authenticatedUser.setPassword("password");
@@ -87,9 +90,6 @@ public class TaskControllerIntegrationTest {
 
     @AfterEach
     public void tearDown() {
-        taskRepository.deleteAll();
-        userRepository.deleteAll();
-        projectRepository.deleteAll();
         SecurityContextHolder.clearContext();
     }
 
