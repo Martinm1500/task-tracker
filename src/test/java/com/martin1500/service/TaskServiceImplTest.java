@@ -232,7 +232,7 @@ public class TaskServiceImplTest {
 
     @Test
     void addAssignee_ShouldAddUserToTask() {
-        Project project = projectRepository.save(Project.builder().name("Project 1").build());
+        Project project = projectRepository.save(Project.builder().name("Project 1").members(new HashSet<>()).build());
         Task task = taskRepository.save(Task.builder().title("Task 1").project(project).createdBy(authenticatedUser)
                 .dueDate(LocalDate.now().plusDays(1)).priority(Priority.LOW).status(Status.PENDING)
                 .assignees(new HashSet<>()).build());
