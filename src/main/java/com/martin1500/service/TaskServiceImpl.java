@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -141,12 +142,25 @@ public class TaskServiceImpl implements TaskService {
         User assignee = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
+        if (task.getAssignees() == null) {
+            task.setAssignees(new HashSet<>());
+        }
+        if (assignee.getAssignedTasks() == null) {
+            assignee.setAssignedTasks(new HashSet<>());
+        }
+
         task.getAssignees().add(assignee);
         assignee.getAssignedTasks().add(task);
 
         Project project = task.getProject();
         if (project != null) {
+            if (project.getMembers() == null) {
+                project.setMembers(new HashSet<>());
+            }
             project.getMembers().add(assignee);
+            if (assignee.getProjects() == null) {
+                assignee.setProjects(new HashSet<>());
+            }
             assignee.getProjects().add(project);
         }
 
