@@ -233,10 +233,16 @@ public class TaskServiceImplTest {
     @Test
     @Transactional
     void addAssignee_ShouldAddUserToTask() {
-        Project project = projectRepository.save(Project.builder().name("Project 1").members(new HashSet<>()).build());
+        Project project = new Project();
+        project.setName("Project 1");
+        project.getMembers().add(authenticatedUser);
+
+        projectRepository.save(project);
+
         Task task = taskRepository.save(Task.builder().title("Task 1").project(project).createdBy(authenticatedUser)
                 .dueDate(LocalDate.now().plusDays(1)).priority(Priority.LOW).status(Status.PENDING)
                 .assignees(new HashSet<>()).build());
+
         User assignee = userRepository.save(User.builder().username("assignee").email("assignee@gmail.com")
                 .password("password123").role(Role.USER).build());
 
