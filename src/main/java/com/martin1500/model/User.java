@@ -19,24 +19,25 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"createdTasks"})
-@ToString(exclude = {"createdTasks"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"createdTasks", "assignedTasks", "projects"})
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(unique=true, nullable=false)
+    @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(unique = true, nullable=false)
+    @Column(unique = true, nullable = false)
     @Email
     private String email;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     @Size(min = 8, max = 100)
     @JsonIgnore
     private String password;
@@ -51,6 +52,7 @@ public class User implements UserDetails {
     private Set<Task> assignedTasks = new HashSet<>();
 
     @ManyToMany(mappedBy = "members")
+    @JsonIgnore
     private Set<Project> projects = new HashSet<>();
 
     @Override
@@ -59,19 +61,11 @@ public class User implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
+    public boolean isEnabled() { return true; }
 }

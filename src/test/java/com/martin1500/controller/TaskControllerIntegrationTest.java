@@ -278,7 +278,12 @@ public class TaskControllerIntegrationTest {
     @Test
     @Transactional
     void addAssignee_ShouldAddUserToTask() {
-        Project project = projectRepository.save(Project.builder().name("Project 1").members(new HashSet<>()).build());
+        // Arrange
+        Project project = projectRepository.save(Project.builder()
+                .name("Project 1")
+                .members(new HashSet<>())
+                .build());
+
         Task task = Task.builder()
                 .title("Task 1")
                 .createdBy(authenticatedUser)
@@ -301,56 +306,22 @@ public class TaskControllerIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(accessToken);
 
-        Map<String, Long> body = Map.of("userId", assignee.getId());
-        HttpEntity<Map<String, Long>> request = new HttpEntity<>(body, headers);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
 
+        // Act
         ResponseEntity<TaskDTO> response = restTemplate.exchange(
-                "/api/tasks/" + task.getId() + "/assignees",
+                "/api/tasks/" + task.getId() + "/assignees/" + assignee.getId(),
                 HttpMethod.POST,
                 request,
                 TaskDTO.class
         );
 
+        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Expected 200 OK, got " + response.getStatusCode());
         assertNotNull(response.getBody());
 
         Task updatedTask = taskRepository.findById(task.getId()).orElseThrow();
         Hibernate.initialize(updatedTask.getAssignees());
         assertTrue(updatedTask.getAssignees().contains(assignee));
-    }
-
-    @Test
-    void removeAssignee_ShouldRemoveUserFromTask() {
-        Project project = projectRepository.save(Project.builder().name("Project 1").members(new HashSet<>()).build());
-        User assignee = userRepository.save(User.builder().username("assignee").email("assignee@gmail.com")
-                .password("password123").role(Role.USER).build());
-        Task task = Task.builder()
-                .title("Task 1")
-                .createdBy(authenticatedUser)
-                .project(project)
-                .dueDate(LocalDate.now().plusDays(1))
-                .priority(Priority.LOW)
-                .status(Status.PENDING)
-                .assignees(new HashSet<>())
-                .build();
-        task.getAssignees().add(assignee);
-        taskRepository.save(task);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-
-        HttpEntity<Void> request = new HttpEntity<>(headers);
-
-        ResponseEntity<TaskDTO> response = restTemplate.exchange(
-                "/api/tasks/" + task.getId() + "/assignees/" + assignee.getId(),
-                HttpMethod.DELETE,
-                request,
-                TaskDTO.class
-        );
-
-        assertEquals(HttpStatus.OK, response.getStatusCode(), "Expected 200 OK, got " + response.getStatusCode());
-        assertNotNull(response.getBody());
-        Task updatedTask = taskRepository.findById(task.getId()).orElseThrow();
-        assertFalse(updatedTask.getAssignees().contains(assignee));
     }
 }

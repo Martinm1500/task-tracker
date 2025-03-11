@@ -3,6 +3,7 @@ package com.martin1500.service;
 import com.martin1500.dto.TaskCreateDTO;
 import com.martin1500.dto.TaskDTO;
 import com.martin1500.exception.ResourceNotFoundException;
+import com.martin1500.model.Project;
 import com.martin1500.model.Task;
 import com.martin1500.model.User;
 import com.martin1500.model.util.Priority;
@@ -38,6 +39,7 @@ public class TaskServiceImpl implements TaskService {
         newTask.setCreatedBy(authenticatedUser);
         newTask.setTitle(taskCreateDTO.title());
         newTask.setStatus(Status.PENDING);
+        newTask.setPriority(taskCreateDTO.priority());
 
         Task createdTask = taskRepository.save(newTask);
         return taskToTaskDTO(createdTask);
@@ -138,8 +140,16 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
         User assignee = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
         task.getAssignees().add(assignee);
-        task.getProject().getMembers().add(assignee);
+        assignee.getAssignedTasks().add(task);
+
+        Project project = task.getProject();
+        if (project != null) {
+            project.getMembers().add(assignee);
+            assignee.getProjects().add(project);
+        }
+
         Task updatedTask = taskRepository.save(task);
         return taskToTaskDTO(updatedTask);
     }

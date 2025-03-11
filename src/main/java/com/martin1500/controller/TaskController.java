@@ -81,10 +81,10 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTasksByProject(projectId));
     }
 
-    @PostMapping("/{id}/assignees")
+    @PostMapping("/{id}/assignees/{userId}")
     @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<TaskDTO> addAssignee(@PathVariable Long id, @RequestBody Map<String, Long> body) {
-        return ResponseEntity.ok(taskService.addAssignee(id, body.get("userId")));
+    public ResponseEntity<TaskDTO> addAssignee(@PathVariable Long id, @PathVariable Long userId ) {
+        return ResponseEntity.ok(taskService.addAssignee(id, userId));
     }
 
     @DeleteMapping("/{id}/assignees/{userId}")

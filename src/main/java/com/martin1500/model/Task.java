@@ -3,10 +3,7 @@ package com.martin1500.model;
 import com.martin1500.model.util.Priority;
 import com.martin1500.model.util.Status;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,10 +16,13 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"assignees", "project"})
 @Entity
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     private String title;
@@ -36,7 +36,7 @@ public class Task {
     @Column(nullable = false)
     private Priority priority;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private LocalDate dueDate;
 
     @CreationTimestamp
@@ -50,7 +50,7 @@ public class Task {
     @JoinColumn(name = "created_by_id", nullable = false)
     private User createdBy;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "task_assignees",
             joinColumns = @JoinColumn(name = "task_id"),
@@ -63,5 +63,4 @@ public class Task {
     private Project project;
 
     private String comments;
-
 }
