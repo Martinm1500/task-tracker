@@ -69,6 +69,7 @@ public class TaskController {
     }
 
     @GetMapping("/overdue")
+    @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<List<TaskDTO>> getOverdueTasks() {
         List<TaskDTO> tasks = taskService.getOverdueTasks();
         return ResponseEntity.ok(tasks);

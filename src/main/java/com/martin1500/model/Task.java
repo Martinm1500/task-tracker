@@ -50,7 +50,7 @@ public class Task {
     @JoinColumn(name = "created_by_id", nullable = false)
     private User createdBy;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "task_assignees",
             joinColumns = @JoinColumn(name = "task_id"),
